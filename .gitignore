@@ -1,0 +1,11 @@
+node_modules
+dist
+.DS_Store
+
+# Material de referencia interno: no se publica en el repositorio
+EMER-NET_24_*.pdf
+DESIGN.md
+DESIGN2.md
+
+# Capturas de verificación
+.playwright-mcp

@@ -1,0 +1,40 @@
+:root {
+  /* Color: rojo/naranja = señal perdida o emergencia · azul = conectividad restaurada */
+  --bg: #05080F;          /* noche táctica, el azul marino del logo llevado casi a negro */
+  --bg-raise: #0B1222;
+  --ink: #F2F4F8;
+  --ink-2: #BAC2D0;
+  --mute: #8A93A6;
+  --line: rgba(242, 244, 248, 0.14);
+  --line-strong: rgba(242, 244, 248, 0.32);
+  --signal: #FF6B1A;      /* naranja señal, chaleco de emergencias */
+  --red: #E3262F;         /* el "24" del logo */
+  --blue: #3FA9FF;        /* haz / WiFi / enlace activo */
+
+  /* Tipografía: Barlow nace de la rotulación vial; la condensada da cifras de rotulación de vehículo */
+  --f-text: 'Barlow', system-ui, sans-serif;
+  --f-display: 'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+  --f-data: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --t-body: clamp(1.0625rem, 0.98rem + 0.3vw, 1.25rem);
+  --t-small: 0.9375rem;
+  --t-data: 0.8125rem;
+  --t-h3: clamp(1.25rem, 1.1rem + 0.5vw, 1.5rem);
+  --t-h2: clamp(2.5rem, 1.4rem + 4.2vw, 5.25rem);
+  --t-fig: clamp(5rem, 2.5rem + 10vw, 11.5rem);
+  --t-hero: clamp(5.25rem, 1rem + 17vw, 17.5rem);
+
+  /* Espaciado (base 6px, como DESIGN.md) */
+  --s-1: 6px;
+  --s-2: 12px;
+  --s-3: 18px;
+  --s-4: 24px;
+  --s-5: 36px;
+  --s-6: 60px;
+  --s-7: 96px;
+  --s-8: 144px;
+
+  --gutter: clamp(16px, 4vw, 56px);
+  --maxw: 1440px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

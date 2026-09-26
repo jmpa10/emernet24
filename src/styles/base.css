@@ -1,0 +1,100 @@
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  font-family: var(--f-text);
+  font-size: var(--t-body);
+  font-weight: 400;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: clip;
+}
+
+h1, h2, h3, p, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+
+::selection { background: var(--signal); color: var(--bg); }
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.skip {
+  position: fixed;
+  left: var(--gutter);
+  top: -100px;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--ink);
+  color: var(--bg);
+  text-decoration: none;
+}
+.skip:focus { top: 12px; }
+
+.wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.h2 {
+  font-family: var(--f-text);
+  font-weight: 500;
+  font-size: var(--t-h2);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  max-width: 13ch;
+  text-wrap: balance;
+}
+
+.h3 {
+  font-family: var(--f-text);
+  font-weight: 600;
+  font-size: var(--t-h3);
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+
+.lead {
+  color: var(--ink-2);
+  max-width: 34em;
+  font-weight: 300;
+  font-size: calc(var(--t-body) * 1.06);
+}
+
+/* Lectura tipo telemetría: solo para datos que cambian de verdad */
+.readout {
+  font-family: var(--f-data);
+  font-size: var(--t-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--mute);
+  display: flex;
+  gap: var(--s-2);
+  align-items: baseline;
+}
+.readout__v { color: var(--ink); }
+
+/* Reveal de titulares por líneas (lo activa reveal.js) */
+.line-mask { display: block; overflow: hidden; padding-bottom: 0.22em; margin-bottom: -0.22em; }
+.line-mask > span { display: block; will-change: transform; }
+
+/* Lenis (scroll suave) */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-stopped { overflow: hidden; }
+.lenis.lenis-smooth iframe { pointer-events: none; }

@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EMER-NET 24 · Conectar cuando todo lo demás falla</title>
+  <meta name="description" content="EMER-NET 24 es un nodo de comunicaciones autónomo, 100 % renovable y modular para emergencias y eventos masivos. Proyecto de FP en red de la X Convocatoria Dualiza 2026–2027." />
+  <meta name="theme-color" content="#05080F" />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:title" content="EMER-NET 24 · Conectar cuando todo lo demás falla" />
+  <meta property="og:description" content="Nodo de comunicaciones autónomo, 100 % renovable y modular para emergencias y eventos. Proyecto de FP en red, X Convocatoria Dualiza." />
+  <meta property="og:image" content="./og-image.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="EMER-NET 24" />
+  <meta name="twitter:description" content="Conectar cuando todo lo demás falla." />
+  <meta name="twitter:image" content="./og-image.jpg" />
+
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+  <a class="skip" href="#problema">Saltar al contenido</a>
+
+  <!-- Loader -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader__mark" data-logo="loader"></div>
+    <p class="loader__status"><span>Sincronizando enlace</span> <span class="loader__pct" id="loader-pct">0</span>&thinsp;%</p>
+  </div>
+
+  <!-- Escena WebGL fija -->
+  <canvas class="stage" id="stage" aria-hidden="true"></canvas>
+  <div class="stage-flash" id="stage-flash" aria-hidden="true"></div>
+  <div class="stage-poster" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- HUD anclado al 3D -->
+  <div class="hud" id="hud" aria-hidden="true">
+    <svg class="hud__lines"><line id="hud-line" /><circle id="hud-dot" r="4" /><circle id="hud-ring" r="11" /></svg>
+    <div class="hud__label" id="hud-label"></div>
+  </div>
+
+  <header class="topbar">
+    <a class="brand" href="#portada" aria-label="EMER-NET 24, inicio">
+      <span class="brand__mark" data-logo="small"></span>
+      <span class="brand__word">EMER-NET <b>24</b></span>
+    </a>
+    <nav class="topnav" aria-label="Secciones">
+      <a href="#problema">El problema</a>
+      <a href="#nodo">El nodo</a>
+      <a href="#red">La red</a>
+      <a href="#impacto">Impacto</a>
+    </nav>
+  </header>
+
+  <aside class="rail" aria-hidden="true">
+    <span class="rail__id">Nodo 01</span>
+    <span class="rail__track"><span class="rail__fill" id="rail-fill"></span></span>
+    <span class="rail__pct" id="rail-pct">00</span>
+  </aside>
+
+  <main>
+    <!-- 1 · Portada -->
+    <section class="sec portada" id="portada" data-scene>
+      <div class="portada__inner wrap">
+        <p class="portada__call" data-intro>X Convocatoria Dualiza 2026–2027 · Proyecto en red</p>
+        <h1 class="portada__title" data-intro>
+          <span class="portada__word">EMER-NET</span><span class="portada__num">24</span>
+        </h1>
+        <div class="portada__foot">
+          <p class="portada__sub" data-intro>Plataforma autónoma de conectividad para emergencias y eventos.</p>
+          <p class="portada__claim" data-intro>Conectar cuando todo lo demás falla.</p>
+        </div>
+        <p class="portada__cue" data-intro><span class="cue-line"></span>Desliza para desplegar</p>
+      </div>
+    </section>
+
+    <!-- 2 · El problema -->
+    <section class="sec problema" id="problema" data-scene data-pin>
+      <div class="pin">
+        <div class="wrap problema__grid">
+          <h2 class="h2" data-lines>Cuando la red cae, el rescate se queda a ciegas.</h2>
+          <div class="problema__cols">
+            <div>
+              <h3 class="h3">Catástrofes</h3>
+              <p>Incendios forestales, DANAs e inundaciones derriban las antenas justo cuando más se necesitan. Las zonas rurales y de montaña se quedan aisladas.</p>
+            </div>
+            <div>
+              <h3 class="h3">Eventos masivos</h3>
+              <p>En conciertos, romerías o ferias, miles de móviles saturan la red comercial. Sanitarios y fuerzas de seguridad pierden la señal.</p>
+            </div>
+          </div>
+          <div class="readout problema__readout">
+            <span class="readout__k">Cobertura móvil en la zona</span>
+            <span class="readout__v" id="coverage-v">100&thinsp;%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 · El nodo -->
+    <section class="sec nodo" id="nodo" data-scene data-pin>
+      <div class="pin">
+        <div class="wrap nodo__grid">
+          <header class="nodo__head">
+            <h2 class="h2" data-lines>Un nodo autónomo, 100&nbsp;% renovable y modular.</h2>
+            <p class="nodo__clock readout"><span class="readout__k">Despliegue</span> <span class="readout__v" id="clock">T+ 00:00</span></p>
+          </header>
+
+          <ol class="steps" id="steps">
+            <li class="step" data-step="0">
+              <p class="step__fig"><span class="step__pre"></span><span class="step__num" data-to="1600" data-format="miles">1.600</span><span class="step__unit">Wp</span></p>
+              <h3 class="step__title">Campo solar portátil</h3>
+              <p class="step__text">Cuatro paneles de 400&nbsp;W. Energía limpia, sin depender de un generador diésel.</p>
+            </li>
+            <li class="step" data-step="1">
+              <p class="step__fig"><span class="step__pre"></span><span class="step__num" data-to="24">24</span><span class="step__unit">h</span></p>
+              <h3 class="step__title">Autonomía continua</h3>
+              <p class="step__text">Baterías de litio LiFePO4 e inversor Victron, con telemetría de consumo en tiempo real.</p>
+            </li>
+            <li class="step" data-step="2">
+              <p class="step__fig"><span class="step__pre"></span><span class="step__num" data-to="12">12</span><span class="step__unit">m</span></p>
+              <h3 class="step__title">Mástil telescópico</h3>
+              <p class="step__text">Despliegue neumático estabilizado, operativo con vientos de hasta 50&nbsp;km/h.</p>
+            </li>
+            <li class="step" data-step="3">
+              <p class="step__fig"><span class="step__pre">&lt;</span><span class="step__num" data-to="50">50</span><span class="step__unit">ms</span></p>
+              <h3 class="step__title">Enlace por satélite</h3>
+              <p class="step__text">Starlink High Performance: más de 100&nbsp;Mbps, independiente de la red terrestre.</p>
+            </li>
+            <li class="step" data-step="4">
+              <p class="step__fig"><span class="step__pre">≥</span><span class="step__num" data-to="200">200</span><span class="step__unit">m</span></p>
+              <h3 class="step__title">Radio de cobertura</h3>
+              <p class="step__text">WiFi&nbsp;6 de largo alcance, con redes separadas para servicios de emergencia, operación y público.</p>
+            </li>
+            <li class="step" data-step="5">
+              <p class="step__fig"><span class="step__pre">≤</span><span class="step__num" data-to="15">15</span><span class="step__unit">min</span></p>
+              <h3 class="step__title">Operativo en un cuarto de hora</h3>
+              <p class="step__text">La caja técnica IP54 es extraíble: funciona sobre remolque, en un pick-up o directamente en el suelo.</p>
+            </li>
+          </ol>
+
+          <div class="nodo__meter" aria-hidden="true">
+            <span class="nodo__count" id="step-count">Paso 1 de 6</span>
+            <span class="ticks" id="ticks"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 · La red -->
+    <section class="sec red" id="red" data-scene>
+      <div class="wrap red__grid">
+        <div class="red__text">
+          <h2 class="h2" data-lines>Cinco centros. Un único equipo de emergencias.</h2>
+          <p class="lead">Un sistema así necesita especialistas de muchas disciplinas, igual que un operativo de rescate real. Seis familias profesionales de FP lo construyen juntas.</p>
+
+          <ul class="centros" id="centros">
+            <li data-center="gp">
+              <p class="centros__name">IES Gregorio Prieto <span class="tag">Centro líder</span></p>
+              <p class="centros__place">Castilla-La Mancha</p>
+              <p class="centros__role">Integra la plataforma física, las telecomunicaciones y la ciberseguridad.</p>
+            </li>
+            <li data-center="cat">
+              <p class="centros__name">CIPFP Catarroja</p>
+              <p class="centros__place">Catarroja, Valencia</p>
+              <p class="centros__role">Energías Renovables: diseña y construye parte del módulo energético.</p>
+            </li>
+            <li data-center="can">
+              <p class="centros__name">IES Estelas de Cantabria</p>
+              <p class="centros__place">San Mateo, Cantabria</p>
+              <p class="centros__role">Eficiencia Energética y Energía Solar Térmica: parte del módulo energético.</p>
+            </li>
+            <li data-center="mal">
+              <p class="centros__name">IES Martín de Aldehuela</p>
+              <p class="centros__place">Málaga</p>
+              <p class="centros__role">Telecomunicaciones, Informática y Renovables: un nodo independiente de comunicaciones y energía.</p>
+            </li>
+            <li data-center="jb">
+              <p class="centros__name">IES Juan Bosco</p>
+              <p class="centros__place">Castilla-La Mancha</p>
+              <p class="centros__role">Emergencias Sanitarias: valida el nodo en campo con Protección Civil Valdepeñas.</p>
+            </li>
+          </ul>
+        </div>
+
+        <figure class="red__map" aria-label="Mapa de España con la ubicación de los cinco centros">
+          <canvas id="map"></canvas>
+        </figure>
+      </div>
+
+      <div class="wrap respaldo">
+        <h3 class="h3">Con el respaldo de</h3>
+        <ul class="respaldo__list">
+          <li><p class="respaldo__name">TSD</p><p>Tecnologías y Servicios de Defensa. Valida la arquitectura de red con estándares de comunicaciones tácticas.</p></li>
+          <li><p class="respaldo__name">Tecnobit <span>Grupo Oesia</span></p><p>Electrónica aeroespacial. Revisa componentes con criterios de fiabilidad y robustez.</p></li>
+          <li><p class="respaldo__name">Protección Civil Valdepeñas</p><p>El usuario real. Aporta escenarios y evalúa el nodo en el simulacro de emergencia.</p></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5 · Impacto -->
+    <section class="sec impacto" id="impacto" data-scene data-pin>
+      <div class="pin">
+        <div class="wrap impacto__grid">
+          <div class="impacto__text">
+            <h2 class="h2" data-lines>El blueprint de la resiliencia.</h2>
+            <p class="lead">Planos, esquemas, manuales y código se publicarán en abierto para que cualquier centro pueda construir su propio nodo. El prototipo quedará además como recurso permanente para las prácticas de FP.</p>
+          </div>
+          <ul class="ods">
+            <li style="--ods:#FCC30B"><span class="ods__n">7</span><p class="ods__t">Energía asequible y no contaminante</p><p>100&nbsp;% solar y baterías, sin diésel.</p></li>
+            <li style="--ods:#FD6925"><span class="ods__n">9</span><p class="ods__t">Industria, innovación e infraestructura</p><p>Arquitectura modular, replicable y validada por la industria.</p></li>
+            <li style="--ods:#FD9D24"><span class="ods__n">11</span><p class="ods__t">Ciudades y comunidades sostenibles</p><p>Más capacidad de respuesta en el medio rural y tras una catástrofe.</p></li>
+            <li style="--ods:#3F7E44; --ods-text:#6DBE6F"><span class="ods__n">13</span><p class="ods__t">Acción por el clima</p><p>Cero emisiones netas frente a riesgos climáticos severos.</p></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 · Cierre -->
+    <footer class="sec cierre" id="cierre" data-scene>
+      <div class="wrap">
+        <p class="cierre__claim">Preparados para conectar cuando todo lo demás falla.</p>
+        <p class="cierre__word" aria-label="EMER-NET 24">
+          <span class="cierre__mark" data-logo="footer"></span>
+          <span>EMER-NET<b>24</b></span>
+        </p>
+
+        <div class="logos">
+          <div class="logos__group">
+            <p class="logos__k">Coordina</p>
+            <img src="./logos/gregorio-prieto.jpg" alt="IES Gregorio Prieto, Formación Profesional" width="488" height="495" loading="lazy" />
+          </div>
+          <div class="logos__group">
+            <p class="logos__k">Con el apoyo de</p>
+            <img class="logos__wide" src="./logos/dualiza.jpg" alt="La Convocatoria Dualiza: CaixaBank Dualiza, FP Empresa y Fundación Deloitte" width="487" height="225" loading="lazy" />
+          </div>
+          <div class="logos__group logos__group--grid">
+            <p class="logos__k">Centros y colaboradores</p>
+            <ul class="slots">
+              <li>CIPFP Catarroja</li>
+              <li>IES Estelas de Cantabria</li>
+              <li>IES Martín de Aldehuela</li>
+              <li>IES Juan Bosco</li>
+              <li>TSD</li>
+              <li>Tecnobit</li>
+              <li>Protección Civil Valdepeñas</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="cierre__credit">Proyecto de innovación educativa apoyado por la X Convocatoria de Ayudas Dualiza (CaixaBank Dualiza), modalidad proyecto en red. © 2026 EMER-NET 24.</p>
+      </div>
+    </footer>
+  </main>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
