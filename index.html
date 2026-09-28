@@ -47,13 +47,16 @@
       <span class="brand__mark" data-logo="small"></span>
       <span class="brand__word">EMER-NET <b>24</b></span>
     </a>
-    <nav class="topnav" aria-label="Secciones">
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="topnav" aria-label="Abrir menú"><span></span><span></span></button>
+    <nav class="topnav" id="topnav" aria-label="Secciones">
       <a href="#problema">El problema</a>
       <a href="#nodo">El nodo</a>
       <a href="#red">La red</a>
       <a href="#impacto">Impacto</a>
     </nav>
   </header>
+
+  <div class="progress" aria-hidden="true"><span class="progress__fill" id="progress-fill"></span></div>
 
   <aside class="rail" aria-hidden="true">
     <span class="rail__id">Nodo 01</span>
@@ -73,7 +76,7 @@
           <p class="portada__sub" data-intro>Plataforma autónoma de conectividad para emergencias y eventos.</p>
           <p class="portada__claim" data-intro>Conectar cuando todo lo demás falla.</p>
         </div>
-        <p class="portada__cue" data-intro><span class="cue-line"></span>Desliza para desplegar</p>
+        <p class="portada__cue" data-intro><span class="cue-line"></span><span>Desliza para desplegar</span></p>
       </div>
     </section>
 
@@ -82,7 +85,7 @@
       <div class="pin">
         <div class="wrap problema__grid">
           <h2 class="h2" data-lines>Cuando la red cae, el rescate se queda a ciegas.</h2>
-          <div class="problema__cols">
+          <div class="problema__cols" data-reveal="children">
             <div>
               <h3 class="h3">Catástrofes</h3>
               <p>Incendios forestales, DANAs e inundaciones derriban las antenas justo cuando más se necesitan. Las zonas rurales y de montaña se quedan aisladas.</p>
@@ -92,7 +95,7 @@
               <p>En conciertos, romerías o ferias, miles de móviles saturan la red comercial. Sanitarios y fuerzas de seguridad pierden la señal.</p>
             </div>
           </div>
-          <div class="readout problema__readout">
+          <div class="readout problema__readout" data-reveal>
             <span class="readout__k">Cobertura móvil en la zona</span>
             <span class="readout__v" id="coverage-v">100&thinsp;%</span>
           </div>
@@ -106,7 +109,10 @@
         <div class="wrap nodo__grid">
           <header class="nodo__head">
             <h2 class="h2" data-lines>Un nodo autónomo, 100&nbsp;% renovable y modular.</h2>
-            <p class="nodo__clock readout"><span class="readout__k">Despliegue</span> <span class="readout__v" id="clock">T+ 00:00</span></p>
+            <div class="nodo__readouts">
+              <p class="nodo__clock readout"><span class="readout__k">Despliegue</span> <span class="readout__v" id="clock">T+ 00:00</span></p>
+              <p class="nodo__cov readout" id="restore"><span class="readout__k" id="restore-k">Cobertura</span> <span class="readout__v" id="restore-v">0&thinsp;%</span></p>
+            </div>
           </header>
 
           <ol class="steps" id="steps">
@@ -142,9 +148,16 @@
             </li>
           </ol>
 
-          <div class="nodo__meter" aria-hidden="true">
-            <span class="nodo__count" id="step-count">Paso 1 de 6</span>
-            <span class="ticks" id="ticks"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+          <div class="nodo__meter">
+            <span class="nodo__count" id="step-count" aria-hidden="true">Paso 1 de 6</span>
+            <span class="ticks" id="ticks" role="group" aria-label="Ir a un paso del despliegue">
+              <button type="button" aria-label="Paso 1: campo solar"></button>
+              <button type="button" aria-label="Paso 2: autonomía"></button>
+              <button type="button" aria-label="Paso 3: mástil"></button>
+              <button type="button" aria-label="Paso 4: enlace por satélite"></button>
+              <button type="button" aria-label="Paso 5: radio de cobertura"></button>
+              <button type="button" aria-label="Paso 6: operativo"></button>
+            </span>
           </div>
         </div>
       </div>
@@ -155,9 +168,9 @@
       <div class="wrap red__grid">
         <div class="red__text">
           <h2 class="h2" data-lines>Cinco centros. Un único equipo de emergencias.</h2>
-          <p class="lead">Un sistema así necesita especialistas de muchas disciplinas, igual que un operativo de rescate real. Seis familias profesionales de FP lo construyen juntas.</p>
+          <p class="lead" data-reveal>Un sistema así necesita especialistas de muchas disciplinas, igual que un operativo de rescate real. Seis familias profesionales de FP lo construyen juntas.</p>
 
-          <ul class="centros" id="centros">
+          <ul class="centros" id="centros" data-reveal="children">
             <li data-center="gp">
               <p class="centros__name">IES Gregorio Prieto <span class="tag">Centro líder</span></p>
               <p class="centros__place">Castilla-La Mancha</p>
@@ -192,8 +205,8 @@
       </div>
 
       <div class="wrap respaldo">
-        <h3 class="h3">Con el respaldo de</h3>
-        <ul class="respaldo__list">
+        <h3 class="h3" data-reveal>Con el respaldo de</h3>
+        <ul class="respaldo__list" data-reveal="children">
           <li><p class="respaldo__name">TSD</p><p>Tecnologías y Servicios de Defensa. Valida la arquitectura de red con estándares de comunicaciones tácticas.</p></li>
           <li><p class="respaldo__name">Tecnobit <span>Grupo Oesia</span></p><p>Electrónica aeroespacial. Revisa componentes con criterios de fiabilidad y robustez.</p></li>
           <li><p class="respaldo__name">Protección Civil Valdepeñas</p><p>El usuario real. Aporta escenarios y evalúa el nodo en el simulacro de emergencia.</p></li>
@@ -207,14 +220,17 @@
         <div class="wrap impacto__grid">
           <div class="impacto__text">
             <h2 class="h2" data-lines>El blueprint de la resiliencia.</h2>
-            <p class="lead">Planos, esquemas, manuales y código se publicarán en abierto para que cualquier centro pueda construir su propio nodo. El prototipo quedará además como recurso permanente para las prácticas de FP.</p>
+            <p class="lead" data-reveal>Planos, esquemas, manuales y código se publicarán en abierto para que cualquier centro pueda construir su propio nodo. El prototipo quedará además como recurso permanente para las prácticas de FP.</p>
           </div>
-          <ul class="ods">
-            <li style="--ods:#FCC30B"><span class="ods__n">7</span><p class="ods__t">Energía asequible y no contaminante</p><p>100&nbsp;% solar y baterías, sin diésel.</p></li>
-            <li style="--ods:#FD6925"><span class="ods__n">9</span><p class="ods__t">Industria, innovación e infraestructura</p><p>Arquitectura modular, replicable y validada por la industria.</p></li>
-            <li style="--ods:#FD9D24"><span class="ods__n">11</span><p class="ods__t">Ciudades y comunidades sostenibles</p><p>Más capacidad de respuesta en el medio rural y tras una catástrofe.</p></li>
-            <li style="--ods:#3F7E44; --ods-text:#6DBE6F"><span class="ods__n">13</span><p class="ods__t">Acción por el clima</p><p>Cero emisiones netas frente a riesgos climáticos severos.</p></li>
-          </ul>
+          <div class="impacto__ods">
+            <p class="ods__k" data-reveal>Alineado con los Objetivos de Desarrollo Sostenible (ODS) de la Agenda&nbsp;2030</p>
+            <ul class="ods" data-reveal="children">
+              <li style="--ods:#FCC30B"><span class="ods__n"><span class="ods__pre">ODS</span>7</span><p class="ods__t">Energía asequible y no contaminante</p><p>100&nbsp;% solar y baterías, sin diésel.</p></li>
+              <li style="--ods:#FD6925"><span class="ods__n"><span class="ods__pre">ODS</span>9</span><p class="ods__t">Industria, innovación e infraestructura</p><p>Arquitectura modular, replicable y validada por la industria.</p></li>
+              <li style="--ods:#FD9D24"><span class="ods__n"><span class="ods__pre">ODS</span>11</span><p class="ods__t">Ciudades y comunidades sostenibles</p><p>Más capacidad de respuesta en el medio rural y tras una catástrofe.</p></li>
+              <li style="--ods:#3F7E44; --ods-text:#6DBE6F"><span class="ods__n"><span class="ods__pre">ODS</span>13</span><p class="ods__t">Acción por el clima</p><p>Cero emisiones netas frente a riesgos climáticos severos.</p></li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -222,7 +238,7 @@
     <!-- 6 · Cierre -->
     <footer class="sec cierre" id="cierre" data-scene>
       <div class="wrap">
-        <p class="cierre__claim">Preparados para conectar cuando todo lo demás falla.</p>
+        <p class="cierre__claim" data-reveal>Preparados para conectar cuando todo lo demás falla.</p>
         <p class="cierre__word" aria-label="EMER-NET 24">
           <span class="cierre__mark" data-logo="footer"></span>
           <span>EMER-NET<b>24</b></span>

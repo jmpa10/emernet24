@@ -33,7 +33,9 @@ export async function createStage(canvas, { quality }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   renderer.setClearColor(COLORS.bg, 1);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
+  // sin bloom (calidad baja) se sube la exposición y se realzan los brillos para no perder viveza
+  const boost = quality === 'high' ? 1 : 1.35;
+  renderer.toneMappingExposure = quality === 'high' ? 1.05 : 1.2;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const maxDpr = quality === 'high' ? 2 : 1.5;
   let dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
@@ -79,9 +81,9 @@ export async function createStage(canvas, { quality }) {
 
   const floor = createGround();
   ground.add(floor.object);
-  const towers = createTowers();
+  const towers = createTowers({ boost });
   ground.add(towers.group);
-  const devices = createDevices({ quality });
+  const devices = createDevices({ quality, boost });
   ground.add(devices.object);
   const node = createNode();
   ground.add(node.root);

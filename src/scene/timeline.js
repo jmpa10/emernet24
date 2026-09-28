@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { samplePath, smooth, bump, invLerp, clamp, easeOut } from './util.js';
-import { NODE_STEPS } from '../content.js';
+import { NODE_STEPS, SIGNAL_LOSS, DOME_GROW } from '../content.js';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
@@ -12,14 +12,25 @@ const ORBIT_KEYS = [
 ];
 
 export const SWITCH = 0.72; // cambio de escena órbita → terreno
+const SAT_ROLL = 3.2; // giro del satélite sobre su eje de puntería (encuadre de las alas)
 
 /** Claves del terreno. Algunas dependen de la longitud real de las secciones fijadas. */
-function groundKeys(pe) {
+function groundKeys(pe, narrow) {
   const n = (p) => 2 + p * pe[2]; // progreso fijado del nodo → story
+  // en móvil la caída de la red se ve de cerca: la cámara baja y se acerca a las torres
+  const problem = narrow
+    ? [
+        { s: 1.0, pos: V(-36, 52, 100), target: V(0, 3, 0) },
+        { s: 1 + pe[1] * 0.3, pos: V(-32, 36, 88), target: V(0, 4, 0) },
+        { s: 1 + pe[1], pos: V(-29, 19, 78), target: V(0, 6, -4) },
+      ]
+    : [
+        { s: 1.0, pos: V(54, 48, 92), target: V(0, 6, 0) },
+        { s: 1 + pe[1], pos: V(40, 30, 68), target: V(0, 5, 0) },
+      ];
   return [
     { s: SWITCH, pos: V(0, 200, 70), target: V(0, 0, 0) },
-    { s: 1.0, pos: V(54, 48, 92), target: V(0, 6, 0) },
-    { s: 1 + pe[1], pos: V(40, 30, 68), target: V(0, 5, 0) },
+    ...problem,
     { s: 2.0, pos: V(15, 5.5, 18), target: V(-2, 1.6, 0) },
     { s: n(0.1), pos: V(9.5, 3.8, 11), target: V(0, 1.7, 0) },
     { s: n(0.22), pos: V(7.8, 7.4, 8.8), target: V(0, 2.4, 0) },
@@ -37,8 +48,9 @@ function groundKeys(pe) {
 
 export function createTimeline(stage, scroll, { reduced }) {
   const { camera } = stage;
-  let keys = groundKeys(pe());
-  window.addEventListener('resize', () => (keys = groundKeys(pe())));
+  const isNarrow = () => window.innerWidth <= 900;
+  let keys = groundKeys(pe(), isNarrow());
+  window.addEventListener('resize', () => (keys = groundKeys(pe(), isNarrow())));
 
   function pe() {
     return [0, 1, 2, 3, 4].map((i) => scroll.pinEnd(i));
@@ -59,6 +71,12 @@ export function createTimeline(stage, scroll, { reduced }) {
   const spainPt = new THREE.Vector3(0, 10.02, 0);
   const tmpA = new THREE.Vector3();
   const tmpB = new THREE.Vector3();
+  const aim = new THREE.Vector3();
+  const qAim = new THREE.Quaternion();
+  const qSpin = new THREE.Quaternion();
+  const DOWN = new THREE.Vector3(0, -1, 0);
+  const AXIS_Y = new THREE.Vector3(0, 1, 0);
+  const AXIS_X = new THREE.Vector3(1, 0, 0);
   const flash = document.getElementById('stage-flash');
 
   const out = { scene: 'orbit', step: 0, nodeP: 0, fail: 0, hud: false };
@@ -105,7 +123,7 @@ export function createTimeline(stage, scroll, { reduced }) {
 
     // al cruzar el cambio de escena no se amortigua (evita barrido entre mundos)
     const jumped = first || (camera.userData.scene && camera.userData.scene !== out.scene) || reduced;
-    const damp = jumped ? 1 : 1 - Math.pow(0.0009, dt);
+    const damp = jumped ? 1 : 1 - Math.pow(0.003, dt);
     camPos.lerp(goalPos, damp);
     camTarget.lerp(goalTarget, damp);
     if (jumped) {
@@ -134,17 +152,26 @@ export function createTimeline(stage, scroll, { reduced }) {
       stage.earth.group.rotation.y = 0; // España fija arriba
       const narrow = camera.aspect < 0.8;
       satPos.set(narrow ? 1.0 : 2.7, (narrow ? 13.9 : 13.1) + Math.sin(t * 0.6) * 0.08, narrow ? 4.5 : 3.2);
-      stage.sat.group.position.copy(satPos);
-      stage.sat.group.rotation.set(1.05 + Math.sin(t * 0.3) * 0.06, 0.25 + Math.sin(t * 0.17) * 0.12, -0.55);
-      stage.sat.beacon.material.opacity = Math.sin(t * 3.2) > 0.3 ? 1 : 0.15;
-      stage.uplink.update(t, tmpA.copy(satPos).add(tmpB.set(0, -0.4, 0)), spainPt, camera, 1 - smooth(0.3, 0.55, S));
+      // la parábola (-Y local) apunta a España; el balanceo es leve para que el haz no se despegue
+      const sat = stage.sat;
+      sat.group.position.copy(satPos);
+      aim.subVectors(spainPt, satPos).normalize();
+      qAim.setFromUnitVectors(DOWN, aim);
+      qSpin.setFromAxisAngle(AXIS_Y, SAT_ROLL + Math.sin(t * 0.17) * 0.1);
+      sat.group.quaternion.copy(qAim).multiply(qSpin);
+      qSpin.setFromAxisAngle(AXIS_X, Math.sin(t * 0.3) * 0.04);
+      sat.group.quaternion.multiply(qSpin);
+      sat.group.updateMatrixWorld();
+      sat.beacon.material.opacity = Math.sin(t * 3.2) > 0.3 ? 1 : 0.15;
+      sat.emitter.getWorldPosition(tmpA);
+      stage.uplink.update(t, tmpA, spainPt, camera, 1 - smooth(0.3, 0.55, S));
       stage.render(stage.orbit);
       out.hud = false;
       return out;
     }
 
     // ── escena terreno
-    const fail = S < 1 ? 0 : smooth(0.08, 0.86, probP);
+    const fail = S < 1 ? 0 : smooth(...SIGNAL_LOSS[desktop ? 'wide' : 'narrow'], probP);
     out.fail = fail;
     const blue = smooth(3.55, 4.15, S);
     const spread = smooth(4.08, 4 + scroll.pinEnd(4) * 0.9, S);
@@ -169,7 +196,7 @@ export function createTimeline(stage, scroll, { reduced }) {
     stage.skylink.update(t, tmpA, tmpB, camera, link);
 
     // cúpula
-    const domeR = 56 * easeOut(invLerp(0.7, 0.83, nodeP));
+    const domeR = 56 * easeOut(invLerp(...DOME_GROW, nodeP));
     const domeA = invLerp(0.69, 0.74, nodeP) * worldFade;
     stage.coverage.update(t, domeR, domeA);
 

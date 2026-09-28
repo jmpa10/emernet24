@@ -46,6 +46,10 @@ export function createSatellite() {
   const feed = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.36, 6), dark);
   feed.position.y = -0.5;
   sat.add(feed);
+  // punto del que nace el haz: la punta del alimentador de la parábola
+  const emitter = new THREE.Object3D();
+  emitter.position.y = -0.62;
+  sat.add(emitter);
 
   // antena de señal y baliza roja (el "24")
   const whip = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.5, 6), metal);
@@ -55,7 +59,7 @@ export function createSatellite() {
   beacon.position.set(0.14, 0.9, 0.14);
   sat.add(beacon);
 
-  return { group: sat, beacon };
+  return { group: sat, beacon, emitter };
 }
 
 /** Enlace satélite → superficie: haz con pulsos que viajan + anillos en tierra */
@@ -99,6 +103,9 @@ export function createUplink() {
   }
   const spot = glowSprite(COLORS.signal, 0.55, 0.9);
   group.add(spot);
+  // destello en la parábola: el haz sale del satélite
+  const source = glowSprite(COLORS.blue, 0.42, 0.9);
+  group.add(source);
 
   const a = new THREE.Vector3();
   const b = new THREE.Vector3();
@@ -130,6 +137,8 @@ export function createUplink() {
       beamMat.uniforms.uTime.value = t;
       beamMat.uniforms.uOpacity.value = opacity;
 
+      source.position.copy(a);
+      source.material.opacity = (0.75 + Math.sin(t * 6) * 0.15) * opacity;
       spot.position.copy(b);
       spot.material.opacity = 0.9 * opacity;
       rings.forEach((r, i) => {

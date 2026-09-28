@@ -10,6 +10,9 @@ export function createHud(stage) {
   const ring = document.getElementById('hud-ring');
   const { anchors } = stage.node;
   const targets = [anchors.panels, anchors.battery, anchors.mast, anchors.link, stage.coverage.anchor, anchors.box];
+  // en móvil la etiqueta vive en el hueco entre el titular y el texto del paso
+  const head = document.querySelector('.nodo__head');
+  const steps = document.getElementById('steps');
 
   const v = new THREE.Vector3();
   let current = -1;
@@ -49,8 +52,14 @@ export function createHud(stage) {
       const lh = label.offsetHeight;
       let tx = right ? x + ox : x + ox - lw;
       let ty = y + oy - lh;
+      let minY = 64;
+      let maxY = height - lh - 12;
+      if (mobile) {
+        minY = head.getBoundingClientRect().bottom + 10;
+        maxY = Math.max(minY, steps.getBoundingClientRect().top - lh - 10);
+      }
       tx = Math.min(width - lw - 12, Math.max(12, tx));
-      ty = Math.min(height - lh - 12, Math.max(64, ty));
+      ty = Math.min(maxY, Math.max(minY, ty));
       // suavizado de la etiqueta
       lx = lx === null ? tx : lx + (tx - lx) * 0.25;
       ly = ly === null ? ty : ly + (ty - ly) * 0.25;

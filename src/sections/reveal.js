@@ -46,7 +46,22 @@ export function initReveals({ reduced }) {
       trigger: el,
       start: 'top 82%',
       once: true,
-      onEnter: () => gsap.to(lines, { yPercent: 0, duration: 1.1, ease: 'expo.out', stagger: 0.09 }),
+      onEnter: () => gsap.to(lines, { yPercent: 0, duration: 1.4, ease: 'expo.out', stagger: 0.1 }),
+    });
+  });
+}
+
+/** Entrada suave de bloques secundarios: [data-reveal] entra entero; ="children" escalona sus hijos */
+export function initSoftReveals({ reduced }) {
+  if (reduced) return;
+  document.querySelectorAll('[data-reveal]').forEach((el) => {
+    const items = el.dataset.reveal === 'children' ? [...el.children] : [el];
+    gsap.set(items, { autoAlpha: 0, y: 24 });
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 88%',
+      once: true,
+      onEnter: () => gsap.to(items, { autoAlpha: 1, y: 0, duration: 1.2, ease: 'power3.out', stagger: 0.1 }),
     });
   });
 }
@@ -66,7 +81,8 @@ export function heroIntro({ reduced }) {
     .from('.portada__call', { y: 16, opacity: 0, duration: 1 }, 0.5)
     .from('.portada__foot', { y: 22, opacity: 0, duration: 1.1 }, 0.62)
     .from('.portada__cue', { opacity: 0, duration: 1 }, 1.1)
-    .from('.topbar', { y: -20, opacity: 0, duration: 1 }, 0.7)
+    // sin transform residual: el menú móvil (position: fixed) debe cubrir la pantalla
+    .from('.topbar', { y: -20, opacity: 0, duration: 1, clearProps: 'transform,opacity' }, 0.7)
     .from('.rail', { opacity: 0, duration: 1 }, 1);
   return tl.then();
 }

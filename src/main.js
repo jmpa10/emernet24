@@ -17,10 +17,11 @@ import Lenis from 'lenis';
 import { mountLogos } from './brand/logo.js';
 import { ScrollStory } from './scroll.js';
 import { createLoader } from './sections/loader.js';
-import { initReveals, heroIntro } from './sections/reveal.js';
+import { initReveals, initSoftReveals, heroIntro } from './sections/reveal.js';
 import { countUp } from './sections/counters.js';
 import { initMap } from './sections/map.js';
-import { NODE_STEPS } from './content.js';
+import { NODE_STEPS, SIGNAL_LOSS, DOME_GROW } from './content.js';
+import { smooth, invLerp, easeOut } from './scene/util.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,12 +37,34 @@ window.scrollTo(0, 0);
 // ───────── scroll suave
 let lenis = null;
 if (!reduced) {
-  lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.9, smoothWheel: true });
+  lenis = new Lenis({ lerp: 0.07, wheelMultiplier: 0.85, smoothWheel: true });
   lenis.stop();
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
 }
+
+// ───────── menú móvil
+const topbarEl = document.querySelector('.topbar');
+const menuBtn = document.querySelector('.menu-btn');
+function setMenu(open) {
+  if (topbarEl.classList.contains('nav-open') === open) return;
+  topbarEl.classList.toggle('nav-open', open);
+  menuBtn.setAttribute('aria-expanded', String(open));
+  menuBtn.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+  if (open) {
+    lenis?.stop();
+    topbarEl.querySelector('.topnav a')?.focus();
+  } else lenis?.start();
+}
+menuBtn.addEventListener('click', () => setMenu(!topbarEl.classList.contains('nav-open')));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && topbarEl.classList.contains('nav-open')) {
+    setMenu(false);
+    menuBtn.focus();
+  }
+});
+matchMedia('(max-width: 900px)').addEventListener('change', (e) => !e.matches && setMenu(false));
 
 document.querySelectorAll('a[href^="#"]').forEach((a) => {
   a.addEventListener('click', (e) => {
@@ -49,7 +72,8 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
     const target = id.length > 1 && document.querySelector(id);
     if (!target) return;
     e.preventDefault();
-    if (lenis) lenis.scrollTo(target, { duration: 1.6 });
+    setMenu(false);
+    if (lenis) lenis.scrollTo(target, { duration: 2 });
     else target.scrollIntoView();
     if (id === '#problema') target.setAttribute('tabindex', '-1'), target.focus({ preventScroll: true });
   });
@@ -58,21 +82,33 @@ document.querySelectorAll('a[href^="#"]').forEach((a) => {
 // ───────── estado de la página ligado al scroll
 const scroll = new ScrollStory();
 const steps = [...document.querySelectorAll('.step')];
-const ticks = [...document.querySelectorAll('#ticks i')];
+const ticks = [...document.querySelectorAll('#ticks button')];
 const stepCount = document.getElementById('step-count');
 const clock = document.getElementById('clock');
 const coverage = document.getElementById('coverage-v');
 const railFill = document.getElementById('rail-fill');
 const railPct = document.getElementById('rail-pct');
+const progressFill = document.getElementById('progress-fill');
+const restore = document.getElementById('restore');
+const restoreK = document.getElementById('restore-k');
+const restoreV = document.getElementById('restore-v');
 const topbar = document.querySelector('.topbar');
 const rail = document.querySelector('.rail');
 const navLinks = [...document.querySelectorAll('.topnav a')];
+const problema = document.getElementById('problema');
+const pinned = [...document.querySelectorAll('[data-scene]')]
+  .map((el, i) => ({ el, i, last: '' }))
+  .filter(({ el }) => el.hasAttribute('data-pin'));
+const narrow = matchMedia('(max-width: 900px)');
 
 let lastStep = -1;
 let lastCov = '';
 let lastClock = '';
 let lastPct = '';
 let lastSection = -1;
+let lastCols = '';
+let lastRestore = '';
+let scrolled = false;
 let onLight = false;
 
 function stepFor(p) {
@@ -95,6 +131,17 @@ function updateDom(S) {
     countUp(steps[step].querySelector('.step__num'), { reduced });
     lastStep = step;
   }
+  // la cobertura vuelve a medida que crece la cúpula WiFi (cierra el 0 % del problema)
+  const back = Math.round(easeOut(invLerp(...DOME_GROW, nodeP)) * 100);
+  const r = `${back}`;
+  if (r !== lastRestore) {
+    restoreV.textContent = `${back} %`;
+    restoreK.textContent = back >= 100 ? 'Cobertura restaurada' : 'Cobertura';
+    restore.classList.toggle('is-lost', back < 50);
+    restore.classList.toggle('is-back', back >= 100);
+    lastRestore = r;
+  }
+
   const secs = Math.round(Math.min(1, nodeP / 0.95) * 15 * 60);
   const c = nodeP >= 0.95 ? 'Operativo' : `T+ ${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
   if (c !== lastClock) {
@@ -102,8 +149,9 @@ function updateDom(S) {
     lastClock = c;
   }
 
-  // cobertura en la sección del problema
-  const fail = S < 1 ? 0 : Math.min(1, Math.max(0, (scroll.pinned(1) - 0.08) / 0.78));
+  // cobertura en la sección del problema (misma curva que la escena 3D)
+  const probP = scroll.pinned(1);
+  const fail = S < 1 ? 0 : smooth(...SIGNAL_LOSS[narrow.matches ? 'narrow' : 'wide'], probP);
   const cov = `${Math.round((1 - fail) * 100)} %`;
   if (cov !== lastCov) {
     coverage.textContent = cov;
@@ -111,12 +159,41 @@ function updateDom(S) {
     lastCov = cov;
   }
 
+  // en móvil el texto del problema se retira para que la caída de la red ocupe la pantalla
+  const cols = narrow.matches && !reduced ? (1 - smooth(0.2, 0.34, probP)).toFixed(3) : '1';
+  if (cols !== lastCols) {
+    problema.style.setProperty('--cols', cols);
+    lastCols = cols;
+  }
+
+  // las secciones fijadas entran y salen con un fundido (sin cortes del velo sobre el 3D)
+  if (!reduced) {
+    for (const p of pinned) {
+      const top = scroll.tops[p.i];
+      const end = top + scroll.heights[p.i] - scroll.vh;
+      const enter = smooth(top - scroll.vh * 0.85, top - scroll.vh * 0.25, scroll.y);
+      const exit = smooth(end + scroll.vh * 0.05, end + scroll.vh * 0.6, scroll.y);
+      const vis = (enter * (1 - exit)).toFixed(3);
+      if (vis !== p.last) {
+        p.el.style.setProperty('--vis', vis);
+        p.last = vis;
+      }
+    }
+  }
+
   // raíl de progreso
   const pct = String(Math.round(scroll.progress * 100)).padStart(2, '0');
   if (pct !== lastPct) {
     railFill.style.transform = `scaleY(${scroll.progress.toFixed(3)})`;
+    progressFill.style.transform = `scaleX(${scroll.progress.toFixed(3)})`;
     railPct.textContent = pct;
     lastPct = pct;
+  }
+
+  // el aviso de «desliza» de la portada se va en cuanto hay scroll
+  if (scroll.y > 40 !== scrolled) {
+    scrolled = scroll.y > 40;
+    root.classList.toggle('has-scrolled', scrolled);
   }
 
   // barra superior sobre el pie claro
@@ -134,6 +211,17 @@ function updateDom(S) {
     lastSection = sec;
   }
 }
+
+// ───────── saltar a un paso del despliegue (a mitad de su tramo)
+ticks.forEach((btn, i) => {
+  btn.addEventListener('click', () => {
+    const bounds = [0, ...NODE_STEPS, 1];
+    const p = (bounds[i] + bounds[i + 1]) / 2;
+    const y = scroll.tops[2] + p * (scroll.heights[2] - scroll.vh);
+    if (lenis) lenis.scrollTo(y, { duration: 1.4 });
+    else window.scrollTo(0, y);
+  });
+});
 
 // ───────── arranque
 async function boot() {
@@ -166,6 +254,7 @@ async function boot() {
   await document.fonts.ready;
   loader.progress(0.95);
   initReveals({ reduced });
+  initSoftReveals({ reduced });
   scroll.measure();
   ScrollTrigger.refresh();
 
@@ -175,7 +264,8 @@ async function boot() {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     const S = scroll.update(window.scrollY);
-    if (timeline) {
+    const hidden = scroll.y >= scroll.tops[5]; // el pie claro cubre toda la pantalla
+    if (timeline && !hidden) {
       const out = timeline.update(now / 1000, dt, S);
       hud.update(out.hud, out.step);
     }

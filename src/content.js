@@ -14,6 +14,13 @@ export const HUD_LABELS = [
 // Tramos del despliegue dentro de la sección fijada del nodo (0 → 1)
 export const NODE_STEPS = [0.26, 0.405, 0.555, 0.68, 0.845]; // límites entre los 6 pasos
 
+// Tramo del nodo en el que la cúpula WiFi crece y devuelve la cobertura
+export const DOME_GROW = [0.7, 0.83];
+
+// Caída de la red en la sección del problema (tramo del progreso fijado 0 → 1).
+// En móvil empieza más tarde: primero se lee el texto y después la escena ocupa la pantalla.
+export const SIGNAL_LOSS = { wide: [0.08, 0.86], narrow: [0.36, 0.94] };
+
 // Centros del proyecto. Coordenadas aproximadas por municipio.
 // PENDIENTE DE CONFIRMAR: IES Gregorio Prieto (se asume Valdepeñas) e IES Juan Bosco
 // (se asume Alcázar de San Juan).

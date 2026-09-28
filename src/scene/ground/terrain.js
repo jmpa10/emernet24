@@ -79,7 +79,8 @@ function towerGeometry(h = 17, base = 1.7, top = 0.35, levels = 9) {
   return g;
 }
 
-export function createTowers() {
+/** @param boost realce de brillos cuando no hay bloom (calidad baja) */
+export function createTowers({ boost = 1 } = {}) {
   const group = new THREE.Group();
   const geo = towerGeometry();
   const spots = [
@@ -100,7 +101,7 @@ export function createTowers() {
       a.rotation.y = -ang;
       t.add(a);
     }
-    const light = glowSprite(COLORS.blue, 2.2, 1);
+    const light = glowSprite(COLORS.blue, 2.2 * boost, 1);
     light.position.y = 19.4;
     t.add(light);
     const rings = [0, 1].map(() => {
@@ -138,7 +139,7 @@ export function createTowers() {
           const ph = (t * 0.55 + k * 0.5 + tw.seed) % 1;
           r.scale.setScalar(1 + ph * 16);
           r.material.color.copy(local > 0 ? cDead : cLive);
-          r.material.opacity = (1 - ph) * 0.5 * (1 - local) * opacity * flicker;
+          r.material.opacity = Math.min(1, (1 - ph) * 0.5 * boost * (1 - local) * opacity * flicker);
         });
       });
     },
@@ -146,7 +147,7 @@ export function createTowers() {
 }
 
 /** Dispositivos sobre el terreno: personas, vehículos, puestos de mando */
-export function createDevices({ quality }) {
+export function createDevices({ quality, boost = 1 }) {
   const n = quality === 'high' ? 900 : 520;
   const pos = new Float32Array(n * 3);
   const rnd = new Float32Array(n);
@@ -194,6 +195,7 @@ export function createDevices({ quality }) {
     uCover: { value: -1 },
     uOpacity: { value: 1 },
     uPixelRatio: { value: 1 },
+    uBoost: { value: boost },
     uLive: { value: COLORS.blue.clone() },
     uLost: { value: COLORS.red.clone() },
   };
@@ -209,6 +211,7 @@ export function createDevices({ quality }) {
       uniform float uFail;
       uniform float uCover;
       uniform float uPixelRatio;
+      uniform float uBoost;
       varying float vLost;
       varying float vBlink;
       varying float vWave;
@@ -218,7 +221,7 @@ export function createDevices({ quality }) {
         vBlink = 0.45 + 0.55 * step(0.0, sin(uTime * 5.0 + aRand * 30.0));
         vWave = smoothstep(4.0, 0.0, abs(aDist - uCover)); // frente de la onda de cobertura
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        gl_PointSize = (2.8 + lost * 1.4 + vWave * 3.5) * uPixelRatio * (60.0 / -mv.z);
+        gl_PointSize = (2.8 + lost * 1.4 + vWave * 3.5) * uBoost * uPixelRatio * (60.0 / -mv.z);
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: /* glsl */ `
