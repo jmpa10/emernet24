@@ -14,6 +14,20 @@ export const HUD_LABELS = [
 // Tramos del despliegue dentro de la sección fijada del nodo (0 → 1)
 export const NODE_STEPS = [0.26, 0.405, 0.555, 0.68, 0.845]; // límites entre los 6 pasos
 
+// Pausas del scroll: cada paso ocupa 1/6 del recorrido fijado; el despliegue avanza durante
+// la primera parte (MOVE) y el resto se queda "pillado" para leer el paso con calma.
+const MOVE = 0.55;
+export function holdProgress(raw) {
+  const n = NODE_STEPS.length + 1;
+  const bounds = [0, ...NODE_STEPS, 1];
+  const r = Math.min(Math.max(raw, 0), 1) * n;
+  const i = Math.min(n - 1, Math.floor(r));
+  const t = Math.min(1, (r - i) / MOVE);
+  const e = t * t * (3 - 2 * t);
+  const end = i === n - 1 ? bounds[n] : bounds[i + 1] - 0.0005;
+  return bounds[i] + (end - bounds[i]) * e;
+}
+
 // Tramo del nodo en el que la cúpula WiFi crece y devuelve la cobertura
 export const DOME_GROW = [0.7, 0.83];
 

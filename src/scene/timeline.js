@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { samplePath, smooth, bump, invLerp, clamp, easeOut } from './util.js';
-import { NODE_STEPS, SIGNAL_LOSS, DOME_GROW } from '../content.js';
+import { NODE_STEPS, SIGNAL_LOSS, DOME_GROW, holdProgress } from '../content.js';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
@@ -98,7 +98,7 @@ export function createTimeline(stage, scroll, { reduced }) {
     const S = effectiveStory(rawStory);
     const { width, height, dpr } = stage.size;
     const desktop = width > 900;
-    const nodeP = clamp(invLerp(2, 2 + scroll.pinEnd(2), S));
+    const nodeP = holdProgress(clamp(invLerp(2, 2 + scroll.pinEnd(2), S)));
     const probP = clamp(invLerp(1, 1 + scroll.pinEnd(1), S));
     out.nodeP = nodeP;
 

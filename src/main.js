@@ -20,7 +20,7 @@ import { createLoader } from './sections/loader.js';
 import { initReveals, initSoftReveals, heroIntro } from './sections/reveal.js';
 import { countUp } from './sections/counters.js';
 import { initMap } from './sections/map.js';
-import { NODE_STEPS, SIGNAL_LOSS, DOME_GROW } from './content.js';
+import { NODE_STEPS, SIGNAL_LOSS, DOME_GROW, holdProgress } from './content.js';
 import { smooth, invLerp, easeOut } from './scene/util.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -119,7 +119,7 @@ function stepFor(p) {
 
 function updateDom(S) {
   // paso del despliegue
-  const nodeP = scroll.pinned(2);
+  const nodeP = holdProgress(scroll.pinned(2));
   const step = stepFor(nodeP);
   if (step !== lastStep) {
     steps.forEach((el, i) => el.classList.toggle('is-active', i === step));
@@ -215,8 +215,7 @@ function updateDom(S) {
 // ───────── saltar a un paso del despliegue (a mitad de su tramo)
 ticks.forEach((btn, i) => {
   btn.addEventListener('click', () => {
-    const bounds = [0, ...NODE_STEPS, 1];
-    const p = (bounds[i] + bounds[i + 1]) / 2;
+    const p = (i + 0.8) / (NODE_STEPS.length + 1); // dentro de la pausa del paso
     const y = scroll.tops[2] + p * (scroll.heights[2] - scroll.vh);
     if (lenis) lenis.scrollTo(y, { duration: 1.4 });
     else window.scrollTo(0, y);
