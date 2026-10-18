@@ -3,11 +3,11 @@
 
 // Etiquetas técnicas que acompañan a cada paso del despliegue (HUD sobre el 3D)
 export const HUD_LABELS = [
-  { k: 'Campo FV', v: '4 × 400 W · MPPT 60 A' },
+  { k: 'Campo FV', v: '3 × 600 W · MPPT 60 A' },
   { k: 'Batería LiFePO4', v: '24 V · inversor 1,6 kVA' },
   { k: 'Mástil telescópico', v: '12 m · viento máx. 50 km/h' },
-  { k: 'Starlink HP', v: 'latencia < 50 ms · > 100 Mbps' },
-  { k: 'WiFi 6 · 2 AP sectoriales', v: 'señal ≥ −65 dBm a 200 m' },
+  { k: 'Starlink HP · 2 antenas', v: '2 × 400 Mbps = 800 Mbps' },
+  { k: 'WiFi 6 · 3 AP sectoriales 360°', v: '> 1.000 dispositivos simultáneos' },
   { k: 'Caja técnica IP54', v: 'estado: operativo' },
 ];
 

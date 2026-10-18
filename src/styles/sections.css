@@ -575,6 +575,8 @@ html:not(.js) .nodo__meter { display: none; }
   line-height: 1.25;
 }
 .slots img { max-height: 44px; width: auto; mix-blend-mode: multiply; }
+.slots--logos li { min-height: 96px; border-style: solid; border-color: rgba(18, 38, 74, 0.14); }
+.slots--logos img { max-height: 72px; max-width: 100%; object-fit: contain; }
 .cierre__credit {
   margin-top: clamp(48px, 8vh, 96px);
   padding-top: var(--s-3);
@@ -682,3 +684,5 @@ html:not(.js) .nodo__meter { display: none; }
   .cue-line::after, #hud-ring { animation: none; }
   .js .step, .js .step.is-active { transition: none; }
 }
+/* estos dos logos traen mucho margen blanco en el archivo */
+.slots--logos img[src*="juan-bosco"], .slots--logos img[src*="proteccion-civil"] { transform: scale(1.4); }

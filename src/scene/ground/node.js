@@ -219,7 +219,7 @@ export function createNode() {
     beacons.push(g);
   }
 
-  // ───── campo solar (4 paneles)
+  // ───── campo solar (3 paneles)
   const tex = solarTexture();
   const panelTop = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.28, metalness: 0.5, emissive: '#0a2a5a', emissiveIntensity: 0.2 });
   const panelMats = [M.alu, M.alu, panelTop, M.dark, M.alu, M.alu];
@@ -228,7 +228,7 @@ export function createNode() {
   const tilt = THREE.MathUtils.degToRad(18);
   const qTilt = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
   const arrayCenter = new THREE.Vector3(-0.05, ROOF + 0.55, 0);
-  const slots = [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]];
+  const slots = [[-1, 0], [0, 0], [1, 0]];
   slots.forEach(([c, r], k) => {
     const p = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.035, 1.0), panelMats);
     solids.push(p);
@@ -241,7 +241,7 @@ export function createNode() {
   });
   // soportes del campo solar
   const struts = [];
-  for (const [x, z] of [[-1.2, -0.7], [1.1, -0.7], [-1.2, 0.7], [1.1, 0.7]]) {
+  for (const [x, z] of [[-2.3, -0.45], [2.2, -0.45], [-2.3, 0.45], [2.2, 0.45]]) {
     const s = add(rig, box(0.04, 1, 0.04, M.alu, x, ROOF, z));
     s.geometry.translate(0, 0.5, 0);
     s.scale.y = 0.001;
@@ -267,16 +267,18 @@ export function createNode() {
   const head = new THREE.Group();
   mast.add(head);
   add(head, box(0.95, 0.045, 0.045, M.steel, 0, 0, 0));
-  for (const x of [-0.46, 0.46]) {
-    const ap = add(head, box(0.075, 0.56, 0.16, M.white, x, -0.05, 0));
-    void ap;
+  // 3 AP sectoriales a 120° (cobertura 360°)
+  for (let i = 0; i < 3; i++) {
+    const a = (i * Math.PI * 2) / 3;
+    add(head, box(0.075, 0.56, 0.16, M.white, Math.sin(a) * 0.2, -0.05, Math.cos(a) * 0.2)).rotation.y = a;
   }
   const stalk = add(head, cyl(0.02, 0.4, M.steel));
   stalk.position.y = 0.2;
   const starlink = new THREE.Group();
   starlink.position.y = 0.42;
   starlink.rotation.z = 0.35;
-  add(starlink, box(0.5, 0.03, 0.3, M.white, 0, 0, 0));
+  add(starlink, box(0.5, 0.03, 0.3, M.white, 0, 0, 0.17));
+  add(starlink, box(0.5, 0.03, 0.3, M.white, 0, 0, -0.17));
   head.add(starlink);
   const topLight = glowSprite(COLORS.red, 0.7, 0.9);
   topLight.position.y = 0.72;
