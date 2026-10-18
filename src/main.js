@@ -37,11 +37,57 @@ window.scrollTo(0, 0);
 // ───────── scroll suave
 let lenis = null;
 if (!reduced) {
-  lenis = new Lenis({ lerp: 0.07, wheelMultiplier: 0.85, smoothWheel: true });
+  lenis = new Lenis({ lerp: 0.07, wheelMultiplier: 0.85, smoothWheel: true, virtualScroll: (d) => stepWheel(d) });
   lenis.stop();
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
+}
+
+// ───────── rueda paso a paso en el nodo: cada gesto avanza (o retrocede) un solo paso
+// y se queda retenido en su pausa hasta que la rueda se calma.
+const STEP_COUNT = NODE_STEPS.length + 1;
+let stepLock = false;
+let stepAnimating = false;
+let lastWheel = 0;
+
+function stepStops() {
+  const top = scroll.tops[2];
+  const run = scroll.heights[2] - scroll.vh;
+  return { top, end: top + run, stops: Array.from({ length: STEP_COUNT }, (_, i) => top + (run * (i + 0.8)) / STEP_COUNT) };
+}
+
+function stepWheel({ deltaY, event }) {
+  if (!event.type.includes('wheel') || event.ctrlKey || deltaY === 0) return true;
+  const now = performance.now();
+  // gesto en curso (incluida la inercia del trackpad): se ignora hasta que haya calma
+  if (stepLock) {
+    lastWheel = now;
+    event.preventDefault();
+    return false;
+  }
+  const { top, end, stops } = stepStops();
+  const cur = lenis.targetScroll;
+  const next = cur + deltaY * 0.85;
+  let target = null;
+  if (deltaY > 0) {
+    const stop = stops.find((s) => s > cur + 2);
+    if (stop !== undefined && next > top) target = stop;
+  } else {
+    const stop = [...stops].reverse().find((s) => s < cur - 2);
+    if (stop !== undefined && next < end) target = stop;
+  }
+  if (target === null) return true;
+  event.preventDefault();
+  stepLock = stepAnimating = true;
+  lastWheel = now;
+  lenis.scrollTo(target, { duration: 1.3, lock: true, force: true, onComplete: () => (stepAnimating = false) });
+  const release = () => {
+    if (!stepAnimating && performance.now() - lastWheel > 220) stepLock = false;
+    else requestAnimationFrame(release);
+  };
+  requestAnimationFrame(release);
+  return false;
 }
 
 // ───────── menú móvil
