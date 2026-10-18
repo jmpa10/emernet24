@@ -464,6 +464,15 @@ html:not(.js) .nodo__meter { display: none; }
   line-height: 1;
   margin-bottom: var(--s-2);
 }
+.respaldo__logo {
+  display: grid;
+  place-items: center;
+  height: 96px;
+  margin-bottom: var(--s-3);
+  background: #f3f5fa;
+  border-radius: 8px;
+}
+.respaldo__logo img { max-height: 72px; max-width: 80%; object-fit: contain; mix-blend-mode: multiply; }
 .respaldo__name span { font-weight: 400; color: var(--mute); font-size: 0.55em; margin-left: 0.2em; }
 
 /* ───────── 5 · Impacto ───────── */
@@ -575,8 +584,9 @@ html:not(.js) .nodo__meter { display: none; }
   line-height: 1.25;
 }
 .slots img { max-height: 44px; width: auto; mix-blend-mode: multiply; }
-.slots--logos li { min-height: 96px; border-style: solid; border-color: rgba(18, 38, 74, 0.14); }
-.slots--logos img { max-height: 72px; max-width: 100%; object-fit: contain; }
+.slots--logos li { min-height: 96px; border-style: solid; border-color: rgba(18, 38, 74, 0.14); align-content: space-between; gap: var(--s-2); }
+.slots--logos li span { font-size: 0.8125rem; font-weight: 500; line-height: 1.2; color: #4a5876; }
+.slots--logos img { height: 72px; width: auto; max-width: 100%; object-fit: contain; }
 .cierre__credit {
   margin-top: clamp(48px, 8vh, 96px);
   padding-top: var(--s-3);
@@ -684,5 +694,3 @@ html:not(.js) .nodo__meter { display: none; }
   .cue-line::after, #hud-ring { animation: none; }
   .js .step, .js .step.is-active { transition: none; }
 }
-/* estos dos logos traen mucho margen blanco en el archivo */
-.slots--logos img[src*="juan-bosco"], .slots--logos img[src*="proteccion-civil"] { transform: scale(1.4); }
