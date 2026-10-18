@@ -329,7 +329,7 @@ html:not(.js) .loader { display: none; }
 .problema__readout .readout__v.is-lost { color: var(--red); }
 
 /* ───────── 3 · Nodo ───────── */
-.nodo { height: 620vh; }
+.nodo { height: 1100vh; }
 .nodo__grid {
   display: grid;
   grid-template-rows: auto 1fr auto;
