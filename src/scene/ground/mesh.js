@@ -22,38 +22,44 @@ const LINKS = [
 const MAST_H = 6.5;
 
 const M = {
-  shell: new THREE.MeshStandardMaterial({ color: '#d6cab0', roughness: 0.55, metalness: 0.05, fog: false }),
-  panel: new THREE.MeshStandardMaterial({ color: '#1a1f29', roughness: 0.6, metalness: 0.4, fog: false }),
-  pole: new THREE.MeshStandardMaterial({ color: '#2a2f38', roughness: 0.5, metalness: 0.6, fog: false }),
-  stripe: new THREE.MeshStandardMaterial({ color: '#FF6B1A', emissive: '#FF6B1A', emissiveIntensity: 0.5, fog: false }),
+  shell: new THREE.MeshStandardMaterial({ color: '#1b1e24', roughness: 0.7, metalness: 0.2, fog: false }),
+  edge: new THREE.MeshStandardMaterial({ color: '#b7bec9', roughness: 0.4, metalness: 0.8, fog: false }),
+  pole: new THREE.MeshStandardMaterial({ color: '#a9b1bc', roughness: 0.35, metalness: 0.85, fog: false }),
+  white: new THREE.MeshStandardMaterial({ color: '#eef0f3', roughness: 0.5, metalness: 0.05, fog: false }),
+  battery: new THREE.MeshStandardMaterial({ color: '#2f6fe0', emissive: '#2f6fe0', emissiveIntensity: 0.35, fog: false }),
+  solar: new THREE.MeshStandardMaterial({ color: '#1b3a6b', roughness: 0.3, metalness: 0.5, emissive: '#0a2a5a', emissiveIntensity: 0.3, fog: false }),
 };
 
-/** caja técnica con mástil en trípode y tres antenas, como el módulo de la foto (escala ×1,6) */
+const part = (geo, mat, x, y, z) => {
+  const m = new THREE.Mesh(geo, mat);
+  m.position.set(x, y, z);
+  return m;
+};
+
+/** como el módulo de la foto (escala ×1,6): caja técnica negra con cantoneras, placa solar
+ *  inclinada encima y mástil al lado con antena parabólica arriba y antena sectorial */
 function auxModel() {
   const g = new THREE.Group();
-  const box = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.4, 1.5), M.shell);
-  box.position.y = 0.7;
-  g.add(box);
-  const front = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.5, 0.04), M.panel);
-  front.position.set(0.2, 1.0, 0.77);
-  g.add(front);
-  const stripe = new THREE.Mesh(new THREE.BoxGeometry(1.52, 0.06, 1.52), M.stripe);
-  stripe.position.y = 0.55;
-  g.add(stripe);
-  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.07, MAST_H, 8), M.pole);
-  pole.position.set(1.4, MAST_H / 2, -0.4);
-  g.add(pole);
-  for (let k = 0; k < 3; k++) {
-    const a = (k / 3) * Math.PI * 2;
-    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.4, 6), M.pole);
-    leg.position.set(1.4 + Math.cos(a) * 0.5, 1.0, -0.4 + Math.sin(a) * 0.5);
-    leg.lookAt(1.4, 2.2, -0.4);
-    leg.rotateX(Math.PI / 2);
-    g.add(leg);
-    const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.4, 6), M.panel);
-    ant.position.set(1.4 + (k - 1) * 0.28, MAST_H + 0.5, -0.4);
-    g.add(ant);
-  }
+  const S = 1.3; // lado de la caja
+  g.add(part(new THREE.BoxGeometry(S, S, S), M.shell, 0, S / 2, 0));
+  // cantoneras de aluminio
+  for (const x of [-S / 2, S / 2]) for (const z of [-S / 2, S / 2]) g.add(part(new THREE.BoxGeometry(0.05, S + 0.02, 0.05), M.edge, x, S / 2, z));
+  for (const y of [0.02, S]) for (const z of [-S / 2, S / 2]) g.add(part(new THREE.BoxGeometry(S + 0.04, 0.04, 0.05), M.edge, 0, y, z));
+  // frente abierto: batería azul visible
+  g.add(part(new THREE.BoxGeometry(0.8, 0.38, 0.04), M.battery, 0, 0.3, S / 2 + 0.01));
+  // placa solar inclinada sobre la caja
+  const panel = part(new THREE.BoxGeometry(S + 0.1, 0.04, S * 0.9), M.solar, 0, S + 0.22, 0);
+  panel.rotation.x = -0.32;
+  g.add(panel);
+  // mástil galvanizado junto a la caja
+  const px = S / 2 + 0.22;
+  g.add(part(new THREE.CylinderGeometry(0.06, 0.07, MAST_H, 10), M.pole, px, MAST_H / 2, 0));
+  // antena sectorial a media altura
+  g.add(part(new THREE.BoxGeometry(0.16, 0.9, 0.1), M.white, px + 0.14, MAST_H * 0.62, 0));
+  // antena parabólica arriba, orientada hacia el nodo principal (+Z local)
+  const dish = part(new THREE.CylinderGeometry(0.42, 0.42, 0.08, 20), M.white, px - 0.12, MAST_H - 0.25, 0.2);
+  dish.rotation.x = Math.PI / 2;
+  g.add(dish);
   return g;
 }
 
@@ -62,15 +68,15 @@ export function createMesh() {
   const nodes = AUX_NODES.map(({ x, z, r }) => {
     const root = new THREE.Group();
     root.position.set(x, 0, z);
-    root.rotation.y = Math.atan2(-x, -z); // la cara frontal mira al nodo principal
+    root.rotation.y = Math.atan2(-x, -z); // la cara frontal y la parabólica miran al nodo principal
     const model = auxModel();
     root.add(model);
     const beacon = glowSprite(COLORS.signal, 4, 0);
     beacon.material.fog = false;
-    beacon.position.set(0, MAST_H + 1.4, 0);
+    beacon.position.set(0.87, MAST_H + 0.3, 0);
     root.add(beacon);
     const top = new THREE.Object3D();
-    top.position.set(0, MAST_H + 1.1, 0);
+    top.position.set(0.87, MAST_H - 0.25, 0.2); // la parabólica: allí llega el enlace de la malla
     root.add(top);
     const dome = createCoverage();
     dome.group.position.set(x, 0, z);
