@@ -9,7 +9,7 @@ export function createHud(stage) {
   const dot = document.getElementById('hud-dot');
   const ring = document.getElementById('hud-ring');
   const { anchors } = stage.node;
-  const targets = [anchors.panels, anchors.battery, anchors.mast, anchors.link, stage.coverage.anchor, anchors.box];
+  const targets = [anchors.panels, anchors.battery, anchors.mast, anchors.link, stage.coverage.anchor, anchors.box, stage.mesh.anchor];
   // en móvil la etiqueta vive en el hueco entre el titular y el texto del paso
   const head = document.querySelector('.nodo__head');
   const steps = document.getElementById('steps');

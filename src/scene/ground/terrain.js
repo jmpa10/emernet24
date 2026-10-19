@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { AUX_NODES } from './mesh.js';
 import { COLORS, glowSprite, clamp } from '../util.js';
 
 /** Suelo: rejilla táctica en shader, se atenúa con la distancia */
@@ -157,6 +158,8 @@ export function createDevices({ quality, boost = 1 }) {
     [-18, 14, 7, 0.2], // campamento
     [22, -18, 9, 0.28], // evento masivo
     [-10, -22, 4, 0.1],
+    // zonas de sombra, fuera de la cúpula del nodo principal: solo las cubre la malla
+    ...AUX_NODES.map(({ x, z }) => [x * 1.1, z * 1.1, 11, 0.05]),
   ];
   for (let i = 0; i < n; i++) {
     let x;
@@ -193,6 +196,7 @@ export function createDevices({ quality, boost = 1 }) {
     uTime: { value: 0 },
     uFail: { value: 0 },
     uCover: { value: -1 },
+    uAux: { value: AUX_NODES.map(({ x, z }) => new THREE.Vector3(x, z, -1)) }, // (x, z, radio)
     uOpacity: { value: 1 },
     uPixelRatio: { value: 1 },
     uBoost: { value: boost },
@@ -210,6 +214,7 @@ export function createDevices({ quality, boost = 1 }) {
       uniform float uTime;
       uniform float uFail;
       uniform float uCover;
+      uniform vec3 uAux[${AUX_NODES.length}];
       uniform float uPixelRatio;
       uniform float uBoost;
       varying float vLost;
@@ -217,9 +222,15 @@ export function createDevices({ quality, boost = 1 }) {
       varying float vWave;
       void main() {
         float lost = step(aRand, uFail) * step(uCover, aDist);
+        float wave = smoothstep(4.0, 0.0, abs(aDist - uCover)); // frente de la onda de cobertura
+        for (int k = 0; k < ${AUX_NODES.length}; k++) {
+          float d = distance(position.xz, uAux[k].xy);
+          lost *= step(uAux[k].z, d);
+          wave = max(wave, smoothstep(3.0, 0.0, abs(d - uAux[k].z)) * step(0.0, uAux[k].z));
+        }
         vLost = lost;
         vBlink = 0.45 + 0.55 * step(0.0, sin(uTime * 5.0 + aRand * 30.0));
-        vWave = smoothstep(4.0, 0.0, abs(aDist - uCover)); // frente de la onda de cobertura
+        vWave = wave;
         vec4 mv = modelViewMatrix * vec4(position, 1.0);
         gl_PointSize = (2.8 + lost * 1.4 + vWave * 3.5) * uBoost * uPixelRatio * (60.0 / -mv.z);
         gl_Position = projectionMatrix * mv;

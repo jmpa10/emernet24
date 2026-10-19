@@ -239,14 +239,43 @@ export function createNode() {
     rig.add(p);
     panels.push({ mesh: p, stowed, deployed });
   });
-  // soportes del campo solar
-  const struts = [];
-  for (const [x, z] of [[-2.3, -0.45], [2.2, -0.45], [-2.3, 0.45], [2.2, 0.45]]) {
-    const s = add(rig, box(0.04, 1, 0.04, M.alu, x, ROOF, z));
-    s.geometry.translate(0, 0.5, 0);
-    s.scale.y = 0.001;
-    struts.push({ mesh: s, z });
+  // estructura del campo solar: dos largueros bajo los paneles, apoyados en el techo con
+  // patas y, en los voladizos laterales, con tornapuntas que bajan a las esquinas de la caja
+  const ARRAY_X = [-0.05 - 1.63 - 0.8, -0.05 + 1.63 + 0.8]; // extremos del campo
+  const railAt = (x, z) => arrayCenter.clone().add(new THREE.Vector3(x + 0.05, -0.045, z).applyQuaternion(qTilt));
+  const struts = []; // patas sobre el techo (crecen con el despliegue)
+  const rails = []; // largueros (se extienden desde el centro)
+  const braces = []; // tornapuntas de los voladizos
+  for (const rz of [-0.4, 0.4]) {
+    const a = railAt(ARRAY_X[0] + 0.06, rz);
+    const b = railAt(ARRAY_X[1] - 0.06, rz);
+    const rail = add(rig, beam(a, b, 0.05, M.alu));
+    rails.push(rail);
+    const zw = a.z;
+    for (const x of [-1.32, -0.05, 1.32]) {
+      const top = railAt(x, rz).y - 0.025;
+      const s = add(rig, box(0.045, 1, 0.045, M.alu, x, ROOF, zw));
+      s.geometry.translate(0, 0.5, 0);
+      s.scale.y = 0.001;
+      struts.push({ mesh: s, h: top - ROOF });
+    }
+    for (const side of [-1, 1]) {
+      const from = new THREE.Vector3(side * (L / 2 + 0.035), ROOF - 0.42, zw);
+      const to = railAt(side > 0 ? ARRAY_X[1] - 0.25 : ARRAY_X[0] + 0.25, rz);
+      to.y -= 0.03;
+      const br = new THREE.Group();
+      br.position.copy(from);
+      const len = from.distanceTo(to);
+      const m = box(0.035, 0.035, len, M.alu, 0, 0, len / 2);
+      solids.push(m);
+      br.add(m);
+      br.lookAt(to);
+      rig.add(br);
+      braces.push(br);
+    }
   }
+  // placas de apoyo de las patas sobre el techo
+  for (const z of [-0.38, 0.38]) for (const x of [-1.32, -0.05, 1.32]) add(rig, box(0.12, 0.012, 0.12, M.steel, x, ROOF + 0.006, z));
 
   // ───── mástil telescópico
   const mast = new THREE.Group();
@@ -332,10 +361,9 @@ export function createNode() {
       p.mesh.quaternion.slerpQuaternions(p.stowed.q, p.deployed.q, tk);
     });
     const st = easeInOut(clamp((state.panels - 0.5) / 0.5));
-    struts.forEach(({ mesh, z }) => {
-      const h = z > 0 ? 0.55 - 0.16 : 0.55 + 0.16;
-      mesh.scale.y = Math.max(0.001, h * st);
-    });
+    struts.forEach(({ mesh, h }) => (mesh.scale.y = Math.max(0.001, h * st)));
+    rails.forEach((r) => (r.scale.z = Math.max(0.001, st)));
+    braces.forEach((br) => (br.scale.z = Math.max(0.001, st)));
 
     // puerta y batería
     door.rotation.y = easeInOut(clamp(state.door)) * 1.8;

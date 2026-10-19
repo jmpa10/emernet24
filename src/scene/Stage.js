@@ -11,6 +11,7 @@ import { createSatellite, createUplink } from './orbit/satellite.js';
 import { createGround, createTowers, createDevices } from './ground/terrain.js';
 import { createNode } from './ground/node.js';
 import { createCoverage, createSkyLink } from './ground/coverage.js';
+import { createMesh } from './ground/mesh.js';
 import { bakeEdges, createBlueprint } from './ground/blueprint.js';
 
 export function detectQuality() {
@@ -91,6 +92,8 @@ export async function createStage(canvas, { quality }) {
   ground.add(coverage.group);
   const skylink = createSkyLink();
   ground.add(skylink.group);
+  const mesh = createMesh();
+  ground.add(mesh.group);
 
   // el plano técnico se hornea con el nodo desplegado y se restaura
   Object.assign(node.state, { roll: 1, jacks: 1, panels: 1, door: 0, battery: 1, mast: 1 });
@@ -160,6 +163,7 @@ export async function createStage(canvas, { quality }) {
     node,
     coverage,
     skylink,
+    mesh,
     blueprint,
     render,
     get size() {

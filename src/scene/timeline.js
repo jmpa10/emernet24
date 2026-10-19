@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { samplePath, smooth, bump, invLerp, clamp, easeOut } from './util.js';
-import { NODE_STEPS, SIGNAL_LOSS, DOME_GROW, holdProgress } from '../content.js';
+import { NODE_STEPS, SIGNAL_LOSS, DOME_GROW, holdProgress, deployOf, meshOf } from '../content.js';
 
 const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
@@ -17,6 +17,7 @@ const SAT_ROLL = 3.2; // giro del satélite sobre su eje de puntería (encuadre 
 /** Claves del terreno. Algunas dependen de la longitud real de las secciones fijadas. */
 function groundKeys(pe, narrow) {
   const n = (p) => 2 + p * pe[2]; // progreso fijado del nodo → story
+  const d = (p) => n((p * 6) / 7); // tramo del nodo principal (6 de los 7 pasos)
   // en móvil la caída de la red se ve de cerca: la cámara baja y se acerca a las torres
   const problem = narrow
     ? [
@@ -32,13 +33,23 @@ function groundKeys(pe, narrow) {
     { s: SWITCH, pos: V(0, 200, 70), target: V(0, 0, 0) },
     ...problem,
     { s: 2.0, pos: V(15, 5.5, 18), target: V(-2, 1.6, 0) },
-    { s: n(0.1), pos: V(9.5, 3.8, 11), target: V(0, 1.7, 0) },
-    { s: n(0.22), pos: V(7.8, 7.4, 8.8), target: V(0, 2.4, 0) },
-    { s: n(0.36), pos: V(3.4, 1.9, 6.3), target: V(0.6, 1.25, 0.8) },
-    { s: n(0.5), pos: V(15.5, 4.2, 17.5), target: V(0.5, 6.4, 0) },
-    { s: n(0.64), pos: V(8.4, 2.8, 11.8), target: V(0.9, 10.2, -1) },
-    { s: n(0.8), pos: V(96, 62, 120), target: V(0, 2, 0) },
-    { s: n(0.97), pos: V(78, 38, 98), target: V(0, 3, 0) },
+    { s: d(0.1), pos: V(9.5, 3.8, 11), target: V(0, 1.7, 0) },
+    { s: d(0.22), pos: V(7.8, 7.4, 8.8), target: V(0, 2.4, 0) },
+    { s: d(0.36), pos: V(3.4, 1.9, 6.3), target: V(0.6, 1.25, 0.8) },
+    { s: d(0.5), pos: V(15.5, 4.2, 17.5), target: V(0.5, 6.4, 0) },
+    { s: d(0.64), pos: V(8.4, 2.8, 11.8), target: V(0.9, 10.2, -1) },
+    { s: d(0.8), pos: V(96, 62, 120), target: V(0, 2, 0) },
+    { s: d(0.97), pos: V(78, 38, 98), target: V(0, 3, 0) },
+    // malla: la cámara se aleja y se eleva para abarcar los nodos auxiliares
+    ...(narrow
+      ? [
+          { s: n(0.93), pos: V(150, 250, 205), target: V(-2, 0, -8) },
+          { s: n(0.99), pos: V(142, 238, 195), target: V(-2, 0, -8) },
+        ]
+      : [
+          { s: n(0.93), pos: V(150, 152, 196), target: V(4, 0, -10) },
+          { s: n(0.99), pos: V(142, 142, 186), target: V(4, 0, -10) },
+        ]),
     { s: 3.0, pos: V(64, 58, 64), target: V(0, 0, 0) },
     { s: 4.0, pos: V(10, 70, 58), target: V(0, 0, 0) },
     { s: 4 + pe[4], pos: V(0, 150, 40), target: V(0, 0, 8) },
@@ -98,7 +109,9 @@ export function createTimeline(stage, scroll, { reduced }) {
     const S = effectiveStory(rawStory);
     const { width, height, dpr } = stage.size;
     const desktop = width > 900;
-    const nodeP = holdProgress(clamp(invLerp(2, 2 + scroll.pinEnd(2), S)));
+    const stepP = holdProgress(clamp(invLerp(2, 2 + scroll.pinEnd(2), S)));
+    const nodeP = deployOf(stepP); // despliegue del nodo principal
+    const meshP = meshOf(stepP); // malla de nodos auxiliares
     const probP = clamp(invLerp(1, 1 + scroll.pinEnd(1), S));
     out.nodeP = nodeP;
 
@@ -136,8 +149,9 @@ export function createTimeline(stage, scroll, { reduced }) {
     camera.lookAt(camTarget);
 
     // encuadre desplazado a la derecha en escritorio (deja sitio al texto)
-    const shift = desktop ? smooth(0.85, 1.05, S) * (1 - smooth(2.86, 3.2, S)) * 0.17 : 0;
-    const shiftY = !desktop ? smooth(1.7, 2.05, S) * (1 - smooth(2.86, 3.2, S)) * 0.05 : 0;
+    const out2 = 2 + scroll.pinEnd(2) * 0.985;
+    const shift = desktop ? smooth(0.85, 1.05, S) * (1 - smooth(out2, 3.2, S)) * 0.17 : 0;
+    const shiftY = !desktop ? smooth(1.7, 2.05, S) * (1 - smooth(out2, 3.2, S)) * 0.05 : 0;
     if (shift > 0.0005 || shiftY > 0.0005) camera.setViewOffset(width, height, -width * shift, height * shiftY, width, height);
     else if (camera.view) camera.clearViewOffset();
 
@@ -200,6 +214,10 @@ export function createTimeline(stage, scroll, { reduced }) {
     const domeA = invLerp(0.69, 0.74, nodeP) * worldFade;
     stage.coverage.update(t, domeR, domeA);
 
+    // malla de nodos auxiliares
+    stage.node.anchors.mast.getWorldPosition(tmpA);
+    stage.mesh.update(t, S > 2 ? meshP : 0, worldFade * (blue < 0.5 ? 1 : 0), tmpA, camera);
+
     // torres y dispositivos
     stage.towers.update(t, fail, worldFade);
     stage.towers.group.visible = worldFade > 0.01;
@@ -207,6 +225,7 @@ export function createTimeline(stage, scroll, { reduced }) {
     du.uTime.value = t;
     du.uFail.value = fail;
     du.uCover.value = domeA > 0.01 ? domeR : -1;
+    stage.mesh.state.domes.forEach((r, k) => (du.uAux.value[k].z = r));
     du.uOpacity.value = worldFade;
     du.uPixelRatio.value = dpr;
     stage.devices.object.visible = worldFade > 0.01;
@@ -217,7 +236,7 @@ export function createTimeline(stage, scroll, { reduced }) {
 
     // paso activo del despliegue
     let step = 0;
-    while (step < NODE_STEPS.length && nodeP >= NODE_STEPS[step]) step++;
+    while (step < NODE_STEPS.length && stepP >= NODE_STEPS[step]) step++;
     out.step = step;
     out.hud = !reduced && S > 2 + 0.1 * scroll.pinEnd(2) && S < 2 + scroll.pinEnd(2) * 0.995;
 

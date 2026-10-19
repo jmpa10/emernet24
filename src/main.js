@@ -20,7 +20,7 @@ import { createLoader } from './sections/loader.js';
 import { initReveals, initSoftReveals, heroIntro } from './sections/reveal.js';
 import { countUp } from './sections/counters.js';
 import { initMap } from './sections/map.js';
-import { NODE_STEPS, SIGNAL_LOSS, DOME_GROW, holdProgress } from './content.js';
+import { NODE_STEPS, SIGNAL_LOSS, DOME_GROW, holdProgress, deployOf, meshOf } from './content.js';
 import { smooth, invLerp, easeOut } from './scene/util.js';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -173,23 +173,27 @@ function updateDom(S) {
       el.classList.toggle('is-done', i < step);
       el.classList.toggle('is-now', i === step);
     });
-    stepCount.textContent = `Paso ${step + 1} de 6`;
-    countUp(steps[step].querySelector('.step__num'), { reduced });
+    stepCount.textContent = `Paso ${step + 1} de ${steps.length}`;
+    const num = steps[step].querySelector('.step__num');
+    if (num) countUp(num, { reduced });
     lastStep = step;
   }
   // la cobertura vuelve a medida que crece la cúpula WiFi (cierra el 0 % del problema)
-  const back = Math.round(easeOut(invLerp(...DOME_GROW, nodeP)) * 100);
-  const r = `${back}`;
+  // y la malla de nodos auxiliares la amplía a las zonas de sombra
+  const deployP = deployOf(nodeP);
+  const back = Math.round(easeOut(invLerp(...DOME_GROW, deployP)) * 100);
+  const wider = meshOf(nodeP) > 0.45;
+  const r = `${back}${wider}`;
   if (r !== lastRestore) {
     restoreV.textContent = `${back} %`;
-    restoreK.textContent = back >= 100 ? 'Cobertura restaurada' : 'Cobertura';
+    restoreK.textContent = wider ? 'Cobertura ampliada en malla' : back >= 100 ? 'Cobertura restaurada' : 'Cobertura';
     restore.classList.toggle('is-lost', back < 50);
     restore.classList.toggle('is-back', back >= 100);
     lastRestore = r;
   }
 
-  const secs = Math.round(Math.min(1, nodeP / 0.95) * 15 * 60);
-  const c = nodeP >= 0.95 ? 'Operativo' : `T+ ${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
+  const secs = Math.round(Math.min(1, deployP / 0.95) * 15 * 60);
+  const c = deployP >= 0.95 ? 'Operativo' : `T+ ${String(Math.floor(secs / 60)).padStart(2, '0')}:${String(secs % 60).padStart(2, '0')}`;
   if (c !== lastClock) {
     clock.textContent = c;
     lastClock = c;

@@ -100,11 +100,12 @@ export function createCoverage() {
   };
 }
 
-/** Haz Starlink: desde la antena del mástil hacia un satélite en el cielo */
-export function createSkyLink() {
+/** Haz Starlink: desde la antena del mástil hacia un satélite en el cielo.
+ *  Con fade: false se usa también como enlace entre nodos de la malla. */
+export function createSkyLink({ width = 0.35, fade = true, skySize = 3, footSize = 1.4 } = {}) {
   const group = new THREE.Group();
   const mat = new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 }, uOpacity: { value: 0 }, uColor: { value: COLORS.blue.clone() } },
+    uniforms: { uTime: { value: 0 }, uOpacity: { value: 0 }, uFade: { value: fade ? 1 : 0 }, uColor: { value: COLORS.blue.clone() } },
     transparent: true,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
@@ -115,21 +116,22 @@ export function createSkyLink() {
     fragmentShader: /* glsl */ `
       uniform float uTime;
       uniform float uOpacity;
+      uniform float uFade;
       uniform vec3 uColor;
       varying vec2 vUv;
       void main() {
         float edge = smoothstep(0.5, 0.0, abs(vUv.x - 0.5));
         float pulses = smoothstep(0.6, 1.0, sin((vUv.y * 26.0 - uTime * 4.0) * 3.14159));
-        float fade = smoothstep(1.0, 0.55, vUv.y);
+        float fade = mix(1.0, smoothstep(1.0, 0.55, vUv.y), uFade);
         float a = edge * (0.18 + pulses) * fade * uOpacity;
         gl_FragColor = vec4(uColor * (1.0 + pulses * 0.6), a);
       }`,
   });
-  const beam = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 1), mat);
+  const beam = new THREE.Mesh(new THREE.PlaneGeometry(width, 1), mat);
   group.add(beam);
-  const sky = glowSprite(COLORS.ink, 3, 0);
+  const sky = glowSprite(fade ? COLORS.ink : COLORS.blue, skySize, 0);
   group.add(sky);
-  const foot = glowSprite(COLORS.blue, 1.4, 0);
+  const foot = glowSprite(COLORS.blue, footSize, 0);
   group.add(foot);
 
   const mid = new THREE.Vector3();

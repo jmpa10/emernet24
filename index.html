@@ -122,7 +122,7 @@
               <p class="step__text">Tres paneles de 600&nbsp;W. Energía limpia, sin depender de un generador diésel.</p>
             </li>
             <li class="step" data-step="1">
-              <p class="step__fig"><span class="step__pre"></span><span class="step__num" data-to="24">24</span><span class="step__unit">h</span></p>
+              <p class="step__fig"><span class="step__pre"></span><span class="step__num" data-to="24">24</span><span class="step__unit">h</span><span class="step__post">/&thinsp;7 días</span></p>
               <h3 class="step__title">Autonomía continua</h3>
               <p class="step__text">Baterías de litio LiFePO4 e inversor Victron, con telemetría de consumo en tiempo real.</p>
             </li>
@@ -139,17 +139,22 @@
             <li class="step" data-step="4">
               <p class="step__fig"><span class="step__pre">≥</span><span class="step__num" data-to="200">200</span><span class="step__unit">m</span></p>
               <h3 class="step__title">Radio de cobertura</h3>
-              <p class="step__text">WiFi&nbsp;6 con 3 AP sectoriales de 360°, para más de 1.000&nbsp;dispositivos simultáneos y redes separadas para emergencias, operación y público.</p>
+              <p class="step__text">WiFi&nbsp;6 con 3 AP sectoriales de 360°, para más de 1.000 (aprox. 3.000)&nbsp;dispositivos simultáneos y redes separadas para emergencias, operación y público.</p>
             </li>
             <li class="step" data-step="5">
               <p class="step__fig"><span class="step__pre">≤</span><span class="step__num" data-to="15">15</span><span class="step__unit">min</span></p>
               <h3 class="step__title">Operativo en un cuarto de hora</h3>
               <p class="step__text">La caja técnica IP54 es extraíble: funciona sobre remolque, en un pick-up o directamente en el suelo.</p>
             </li>
+            <li class="step step--mesh" data-step="6">
+              <figure class="step__photo"><img src="./img/nodo-auxiliar.jpg" alt="Nodo auxiliar EMER-NET 24: caja técnica beis con pantalla de control y mástil de antenas, desplegada en el monte" width="403" height="728" loading="lazy" /></figure>
+              <h3 class="step__title">Nodos auxiliares en malla</h3>
+              <p class="step__text">Donde no llega la señal, un nodo auxiliar repite la del nodo principal. Juntos forman una red WiFi mesh que da más cobertura y cubre las zonas muertas o de sombra.</p>
+            </li>
           </ol>
 
           <div class="nodo__meter">
-            <span class="nodo__count" id="step-count" aria-hidden="true">Paso 1 de 6</span>
+            <span class="nodo__count" id="step-count" aria-hidden="true">Paso 1 de 7</span>
             <span class="ticks" id="ticks" role="group" aria-label="Ir a un paso del despliegue">
               <button type="button" aria-label="Paso 1: campo solar"></button>
               <button type="button" aria-label="Paso 2: autonomía"></button>
@@ -157,6 +162,7 @@
               <button type="button" aria-label="Paso 4: enlace por satélite"></button>
               <button type="button" aria-label="Paso 5: radio de cobertura"></button>
               <button type="button" aria-label="Paso 6: operativo"></button>
+              <button type="button" aria-label="Paso 7: nodos auxiliares en malla"></button>
             </span>
           </div>
         </div>
@@ -207,9 +213,9 @@
       <div class="wrap respaldo">
         <h3 class="h3" data-reveal>Con el respaldo de</h3>
         <ul class="respaldo__list" data-reveal="children">
-          <li><span class="respaldo__logo"><img src="./logos/tsd.jpeg" alt="" loading="lazy" /></span><p class="respaldo__name">TSD</p><p>Technology &amp; Security Developments. Valida la arquitectura de red con estándares de comunicaciones tácticas.</p></li>
-          <li><span class="respaldo__logo"><img src="./logos/tecnobit-oesia.jpeg" alt="" loading="lazy" /></span><p class="respaldo__name">Tecnobit <span>Grupo Oesia</span></p><p>Electrónica aeroespacial. Revisa componentes con criterios de fiabilidad y robustez.</p></li>
-          <li><span class="respaldo__logo"><img src="./logos/proteccion-civil.jpeg" alt="" loading="lazy" /></span><p class="respaldo__name">Protección Civil Valdepeñas</p><p>El usuario real. Aporta escenarios y evalúa el nodo en el simulacro de emergencia.</p></li>
+          <li><span class="respaldo__logo"><img src="./logos/tsd.png" alt="" loading="lazy" /></span><p class="respaldo__name">TSD</p><p>Technology &amp; Security Developments. Valida la arquitectura de red con estándares de comunicaciones tácticas.</p></li>
+          <li><span class="respaldo__logo"><img src="./logos/tecnobit-oesia.png" alt="" loading="lazy" /></span><p class="respaldo__name">Tecnobit <span>Grupo Oesia</span></p><p>Electrónica aeroespacial. Revisa componentes con criterios de fiabilidad y robustez.</p></li>
+          <li><span class="respaldo__logo"><img src="./logos/proteccion-civil.png" alt="" loading="lazy" /></span><p class="respaldo__name">Protección Civil Valdepeñas</p><p>El usuario real. Aporta escenarios y evalúa el nodo en el simulacro de emergencia.</p></li>
         </ul>
       </div>
     </section>
@@ -247,22 +253,22 @@
         <div class="logos">
           <div class="logos__group">
             <p class="logos__k">Coordina</p>
-            <img src="./logos/gregorio-prieto.jpeg" alt="IES Gregorio Prieto, Formación Profesional" width="500" height="500" loading="lazy" />
+            <img src="./logos/gregorio-prieto.png" alt="IES Gregorio Prieto, Formación Profesional" width="465" height="473" loading="lazy" />
           </div>
           <div class="logos__group">
             <p class="logos__k">Con el apoyo de</p>
-            <img class="logos__wide" src="./logos/dualiza.jpg" alt="La Convocatoria Dualiza: CaixaBank Dualiza, FP Empresa y Fundación Deloitte" width="487" height="225" loading="lazy" />
+            <img class="logos__wide" src="./logos/dualiza.png" alt="La Convocatoria Dualiza: CaixaBank Dualiza, FP Empresa y Fundación Deloitte" width="465" height="198" loading="lazy" />
           </div>
           <div class="logos__group logos__group--grid">
             <p class="logos__k">Centros y colaboradores</p>
             <ul class="slots slots--logos">
-              <li><img src="./logos/catarroja.jpeg" alt="CIPFP Catarroja" width="1600" height="1600" loading="lazy" /><span>CIPFP Catarroja</span></li>
-              <li><img src="./logos/estelas-de-cantabria.jpeg" alt="IES Estelas de Cantabria" width="295" height="204" loading="lazy" /><span>IES Estelas de Cantabria</span></li>
-              <li><img src="./logos/martin-de-aldehuela.jpeg" alt="IES Martín de Aldehuela" width="731" height="419" loading="lazy" /><span>IES Martín de Aldehuela</span></li>
-              <li><img src="./logos/juan-bosco.jpeg" alt="IES Juan Bosco" width="1000" height="1000" loading="lazy" /><span>IES Juan Bosco</span></li>
-              <li><img src="./logos/tsd.jpeg" alt="TSD, Technology &amp; Security Developments" width="673" height="483" loading="lazy" /><span>TSD · Technology &amp; Security Developments</span></li>
-              <li><img src="./logos/tecnobit-oesia.jpeg" alt="Tecnobit, Fundación Oesia" width="500" height="293" loading="lazy" /><span>Tecnobit · Grupo Oesia</span></li>
-              <li><img src="./logos/proteccion-civil.jpeg" alt="Protección Civil Valdepeñas" width="455" height="470" loading="lazy" /><span>Protección Civil Valdepeñas</span></li>
+              <li><img src="./logos/catarroja.png" alt="CIPFP Catarroja" width="800" height="756" loading="lazy" /><span>CIPFP Catarroja</span></li>
+              <li><img src="./logos/estelas-de-cantabria.png" alt="IES Estelas de Cantabria" width="291" height="193" loading="lazy" /><span>IES Estelas de Cantabria</span></li>
+              <li><img src="./logos/martin-de-aldehuela.png" alt="IES Martín de Aldehuela" width="731" height="419" loading="lazy" /><span>IES Martín de Aldehuela</span></li>
+              <li><img src="./logos/juan-bosco.png" alt="IES Juan Bosco" width="704" height="736" loading="lazy" /><span>IES Juan Bosco</span></li>
+              <li><img src="./logos/tsd.png" alt="TSD, Technology &amp; Security Developments" width="673" height="483" loading="lazy" /><span>TSD · Technology &amp; Security Developments</span></li>
+              <li><img src="./logos/tecnobit-oesia.png" alt="Tecnobit, Fundación Oesia" width="500" height="293" loading="lazy" /><span>Tecnobit · Grupo Oesia</span></li>
+              <li><img src="./logos/proteccion-civil.png" alt="Protección Civil Valdepeñas" width="297" height="427" loading="lazy" /><span>Protección Civil Valdepeñas</span></li>
             </ul>
           </div>
         </div>

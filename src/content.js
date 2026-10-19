@@ -7,14 +7,22 @@ export const HUD_LABELS = [
   { k: 'Batería LiFePO4', v: '24 V · inversor 1,6 kVA' },
   { k: 'Mástil telescópico', v: '12 m · viento máx. 50 km/h' },
   { k: 'Starlink HP · 2 antenas', v: '2 × 400 Mbps = 800 Mbps' },
-  { k: 'WiFi 6 · 3 AP sectoriales 360°', v: '> 1.000 dispositivos simultáneos' },
+  { k: 'WiFi 6 · 3 AP sectoriales 360°', v: '> 1.000 (aprox. 3.000) dispositivos simultáneos' },
   { k: 'Caja técnica IP54', v: 'estado: operativo' },
+  { k: 'Nodo auxiliar · WiFi mesh', v: 'repite la señal del nodo principal' },
 ];
 
-// Tramos del despliegue dentro de la sección fijada del nodo (0 → 1)
-export const NODE_STEPS = [0.26, 0.405, 0.555, 0.68, 0.845]; // límites entre los 6 pasos
+// Tramos del despliegue dentro de la sección fijada del nodo (0 → 1). El nodo principal se
+// despliega hasta MESH_START; el último tramo es la malla de nodos auxiliares.
+export const MESH_START = 0.86;
+const DEPLOY_STEPS = [0.26, 0.405, 0.555, 0.68, 0.845]; // límites entre los 6 pasos del nodo principal
+export const NODE_STEPS = [...DEPLOY_STEPS.map((b) => b * MESH_START), MESH_START]; // límites entre los 7 pasos
 
-// Pausas del scroll: cada paso ocupa 1/6 del recorrido fijado; el despliegue avanza durante
+/** progreso del nodo (0 → 1) → despliegue del nodo principal (0 → 1) y de la malla (0 → 1) */
+export const deployOf = (p) => Math.min(1, p / MESH_START);
+export const meshOf = (p) => Math.min(1, Math.max(0, (p - MESH_START) / (1 - MESH_START)));
+
+// Pausas del scroll: cada paso ocupa 1/7 del recorrido fijado; el despliegue avanza durante
 // la primera parte (MOVE) y el resto se queda "pillado" para leer el paso con calma.
 const MOVE = 0.55;
 export function holdProgress(raw) {
@@ -28,7 +36,7 @@ export function holdProgress(raw) {
   return bounds[i] + (end - bounds[i]) * e;
 }
 
-// Tramo del nodo en el que la cúpula WiFi crece y devuelve la cobertura
+// Tramo del despliegue (deployOf) en el que la cúpula WiFi crece y devuelve la cobertura
 export const DOME_GROW = [0.7, 0.83];
 
 // Caída de la red en la sección del problema (tramo del progreso fijado 0 → 1).
