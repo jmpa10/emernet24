@@ -50,6 +50,8 @@ const STEP_COUNT = NODE_STEPS.length + 1;
 let stepLock = false;
 let stepAnimating = false;
 let lastWheel = 0;
+let lastAbs = 0;
+let lastDir = 0;
 
 function stepStops() {
   const top = scroll.tops[2];
@@ -60,12 +62,24 @@ function stepStops() {
 function stepWheel({ deltaY, event }) {
   if (!event.type.includes('wheel') || event.ctrlKey || deltaY === 0) return true;
   const now = performance.now();
-  // gesto en curso (incluida la inercia del trackpad): se ignora hasta que haya calma
+  const abs = Math.abs(deltaY);
+  const dir = Math.sign(deltaY);
+  // gesto en curso (incluida la inercia del trackpad): se ignora hasta que haya calma,
+  // salvo que, ya terminado el paso, la rueda acelere o cambie de sentido: eso es un gesto nuevo
+  // (la inercia solo decae, así que un dedo nuevo sobre ella se nota como un repunte)
   if (stepLock) {
+    const fresh = !stepAnimating && (abs > lastAbs * 1.5 + 4 || dir !== lastDir);
     lastWheel = now;
-    event.preventDefault();
-    return false;
+    lastAbs = abs;
+    lastDir = dir;
+    if (!fresh) {
+      event.preventDefault();
+      return false;
+    }
+    stepLock = false;
   }
+  lastAbs = abs;
+  lastDir = dir;
   const { top, end, stops } = stepStops();
   const cur = lenis.targetScroll;
   const next = cur + deltaY * 0.85;
