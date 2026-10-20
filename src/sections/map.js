@@ -110,7 +110,7 @@ export function initMap({ reduced }) {
     ctx.strokeRect(oi * cell, oj * cell, cw * cell, ch * cell);
     ctx.setLineDash([]);
 
-    // enlaces desde el centro líder
+    // enlaces desde el centro coordinador
     const linkP = reduced ? 1 : Math.min(1, Math.max(0, (t - 1.0) / 1.4));
     for (const c of centers) {
       if (c === lead) continue;
